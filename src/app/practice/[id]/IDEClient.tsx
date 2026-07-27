@@ -883,19 +883,70 @@ export default function IDEClient({
             <div className="flex-1 overflow-y-auto p-3">
               {consoleTab === "testcase" && (
                 <div className="space-y-3">
-                  {problem.examples.slice(0, 2).map((ex, i) => (
-                    <div key={i}>
-                      <div className="text-xs text-[#8b949e] mb-1">Case {i + 1}</div>
-                      <div className="bg-[#0d1117] border border-[#21262d] rounded-lg p-2.5 font-mono text-xs space-y-0.5">
-                        <div><span className="text-[#8b949e]">Input: </span><span className="text-white">{ex.input}</span></div>
-                        <div><span className="text-[#8b949e]">Expected: </span><span className="text-green-400">{ex.output}</span></div>
-                      </div>
-                    </div>
-                  ))}
-                  <p className="text-xs text-[#8b949e] pt-1">
-                    Press <kbd className="px-1.5 py-0.5 bg-[#161b22] border border-[#21262d] rounded text-white text-[10px]">Run</kbd> to test ·{" "}
-                    <kbd className="px-1.5 py-0.5 bg-[#0071e3]/20 border border-[#0071e3]/30 rounded text-[#0071e3] text-[10px]">Submit</kbd> to score all
-                  </p>
+                  {(() => {
+                    const resultLines = lines.filter(l => l.status === "pass" || l.status === "fail" || l.status === "error");
+                    const hasResults  = resultLines.length > 0;
+                    return problem.examples.slice(0, 2).map((ex, i) => {
+                      const res    = resultLines[i];
+                      const isPass = res?.status === "pass";
+                      const isErr  = res?.status === "error";
+                      const { got } = res ? parseTestLine(res.text) : { got: "" };
+                      return (
+                        <div key={i} className={`rounded-xl border font-mono text-xs overflow-hidden transition-colors ${
+                          !res ? "border-[#21262d] bg-[#0d1117]" :
+                          isPass ? "border-green-500/30 bg-green-500/5" :
+                          isErr  ? "border-orange-500/30 bg-orange-500/5" :
+                                   "border-red-500/30 bg-red-500/5"
+                        }`}>
+                          <div className={`flex items-center gap-2 px-3 py-2 border-b ${
+                            !res ? "border-[#21262d] bg-[#161b22]" :
+                            isPass ? "border-green-500/15 bg-green-500/10" :
+                            isErr  ? "border-orange-500/15 bg-orange-500/10" :
+                                     "border-red-500/15 bg-red-500/10"
+                          }`}>
+                            {res && isPass  && <CheckCircle2 className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />}
+                            {res && isErr   && <AlertCircle  className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />}
+                            {res && !isPass && !isErr && <XCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />}
+                            {!res && <div className="w-3 h-3 rounded-full border-2 border-[#30363d] flex-shrink-0" />}
+                            <span className={`font-semibold text-[11px] ${
+                              !res ? "text-[#8b949e]" :
+                              isPass ? "text-green-300" : isErr ? "text-orange-300" : "text-red-300"
+                            }`}>
+                              Case {i + 1}{res ? (isPass ? " — Passed ✓" : isErr ? " — Error" : " — Failed ✗") : ""}
+                            </span>
+                          </div>
+                          <div className="px-3 py-2 space-y-1">
+                            <div className="flex gap-2">
+                              <span className="text-[#8b949e] w-20 flex-shrink-0">Input:</span>
+                              <span className="text-white break-all">{ex.input}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="text-[#8b949e] w-20 flex-shrink-0">Expected:</span>
+                              <span className="text-green-300 break-all">{ex.output}</span>
+                            </div>
+                            {res && got && (
+                              <div className="flex gap-2">
+                                <span className="text-[#8b949e] w-20 flex-shrink-0">Got:</span>
+                                <span className={`break-all ${isPass ? "text-green-300" : isErr ? "text-orange-300" : "text-red-300"}`}>{got}</span>
+                              </div>
+                            )}
+                            {res && isErr && (
+                              <div className="flex gap-2">
+                                <span className="text-[#8b949e] w-20 flex-shrink-0">Error:</span>
+                                <span className="text-orange-300 break-all text-[10px]">{res.text.replace(/^✗ ERROR \|\s?/, "")}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    });
+                  })()}
+                  {lines.filter(l => l.status === "pass" || l.status === "fail" || l.status === "error").length === 0 && (
+                    <p className="text-xs text-[#8b949e] pt-1">
+                      Press <kbd className="px-1.5 py-0.5 bg-[#161b22] border border-[#21262d] rounded text-white text-[10px]">Run</kbd> to test ·{" "}
+                      <kbd className="px-1.5 py-0.5 bg-[#0071e3]/20 border border-[#0071e3]/30 rounded text-[#0071e3] text-[10px]">Submit</kbd> to score all
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -985,18 +1036,44 @@ export default function IDEClient({
                               );
                             }
 
-                            // compile_ok — styled success banner
+                            // compile_ok — styled success banner + reference test cases
                             if (line.status === "compile_ok") {
                               return (
-                                <div key={i} className="rounded-xl border border-green-500/30 bg-green-500/8 p-4 flex items-center gap-3">
-                                  <div className="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center flex-shrink-0">
-                                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                                <div key={i} className="space-y-3">
+                                  <div className="rounded-xl border border-green-500/30 bg-green-500/8 p-4 flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center flex-shrink-0">
+                                      <CheckCircle2 className="w-5 h-5 text-green-400" />
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-semibold text-green-300">Compilation Successful</p>
+                                      <p className="text-[11px] text-[#8b949e] mt-0.5">Your code compiled without errors.</p>
+                                      <p className="text-[10px] text-[#6e7681] mt-1">
+                                        Switch to{" "}
+                                        <span className="text-yellow-400 font-medium">JavaScript</span> or{" "}
+                                        <span className="text-blue-400 font-medium">Python</span>{" "}
+                                        for automated test-case scoring with pass/fail results.
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <p className="text-sm font-semibold text-green-300">Compilation Successful</p>
-                                    <p className="text-[11px] text-[#8b949e] mt-0.5">Your code compiled without errors.</p>
-                                    <p className="text-[10px] text-[#6e7681] mt-1">Test-case scoring is available in JavaScript & Python only.</p>
-                                  </div>
+                                  <p className="text-[11px] text-[#8b949e] px-1 font-medium">Reference Test Cases</p>
+                                  {problem.examples.slice(0, 2).map((ex, idx) => (
+                                    <div key={idx} className="rounded-xl border border-[#21262d] bg-[#0d1117] font-mono text-xs overflow-hidden">
+                                      <div className="flex items-center gap-2 px-3 py-2 border-b border-[#21262d] bg-[#161b22]">
+                                        <div className="w-3 h-3 rounded-full border-2 border-[#30363d] flex-shrink-0" />
+                                        <span className="text-[11px] text-[#8b949e] font-semibold">Case {idx + 1} — Unverified</span>
+                                      </div>
+                                      <div className="px-3 py-2 space-y-1">
+                                        <div className="flex gap-2">
+                                          <span className="text-[#8b949e] w-20 flex-shrink-0">Input:</span>
+                                          <span className="text-white break-all">{ex.input}</span>
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <span className="text-[#8b949e] w-20 flex-shrink-0">Expected:</span>
+                                          <span className="text-green-300 break-all">{ex.output}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
                               );
                             }

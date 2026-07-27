@@ -265,11 +265,19 @@ export default function IDEClient({
       fullCode = shim + code + "\n" + problem.pyRunner;
     }
     if (isJava) {
-      const javaImports = "import java.util.*;\nimport java.util.stream.*;\nimport java.io.*;\n\n";
-      const withImports = code.trimStart().startsWith("import") ? code : javaImports + code;
-      fullCode = withImports.includes("class Main")
-        ? withImports
-        : withImports + "\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"✔ COMPILE_OK\");\n  }\n}";
+      const JAVA_LIST_NODE =
+        "class ListNode {\n  int val;\n  ListNode next;\n  ListNode() {}\n  ListNode(int val) { this.val = val; }\n  ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n}\n\n";
+      const JAVA_TREE_NODE =
+        "class TreeNode {\n  int val;\n  TreeNode left, right;\n  TreeNode() {}\n  TreeNode(int val) { this.val = val; }\n  TreeNode(int val, TreeNode left, TreeNode right) { this.val = val; this.left = left; this.right = right; }\n}\n\n";
+      let header = "import java.util.*;\nimport java.util.stream.*;\nimport java.io.*;\n\n";
+      if (code.includes("ListNode") && !code.includes("class ListNode")) header += JAVA_LIST_NODE;
+      if (code.includes("TreeNode") && !code.includes("class TreeNode")) header += JAVA_TREE_NODE;
+      // Strip any leading import lines from user code to avoid duplicates
+      const userBody = code.trimStart().replace(/^(import\s+[\w.*]+;\s*\r?\n)*/g, "");
+      fullCode = header + userBody;
+      if (!fullCode.includes("class Main")) {
+        fullCode += "\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"✔ COMPILE_OK\");\n  }\n}";
+      }
     }
     if (lang === "cpp") {
       const cppHeader = "#include <bits/stdc++.h>\nusing namespace std;\n\n";

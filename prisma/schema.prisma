@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model complaint_updates {
+  id            Int         @id @default(autoincrement())
+  complaint_id  Int?
+  updated_by    Int?
+  note          String?
+  status_change String?     @db.VarChar(20)
+  photo_url     String?
+  created_at    DateTime?   @default(now()) @db.Timestamptz(6)
+  complaints    complaints? @relation(fields: [complaint_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users?      @relation(fields: [updated_by], references: [id], onUpdate: NoAction)
+}
+
+model complaints {
+  id                Int                 @id @default(autoincrement())
+  ticket_id         String              @unique @db.VarChar(20)
+  title             String              @db.VarChar(200)
+  type              String              @db.VarChar(50)
+  area              String              @db.VarChar(100)
+  description       String
+  status            String?             @default("open") @db.VarChar(20)
+  urgency           String?             @default("medium") @db.VarChar(10)
+  filed_by_name     String?             @db.VarChar(100)
+  filed_by_phone    String?             @db.VarChar(15)
+  filed_by_email    String?             @db.VarChar(100)
+  assigned_to       Int?
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  complaint_updates complaint_updates[]
+  users             users?              @relation(fields: [assigned_to], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id                Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(100)
+  username          String              @unique @db.VarChar(50)
+  password_hash     String              @db.VarChar(255)
+  role              String              @db.VarChar(10)
+  badge_number      String?             @db.VarChar(20)
+  phone             String?             @db.VarChar(15)
+  avatar_url        String?
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  designation       String?             @db.VarChar(50)
+  complaint_updates complaint_updates[]
+  complaints        complaints[]
+}
+
+model chat_messages {
+  id         Int       @id @default(autoincrement())
+  user_id    Int?
+  role       String?
+  content    String?   @db.Text
+  created_at DateTime? @default(now())
+}
+
+// ── Intel AI Auth Tables (prefixed to avoid conflict with above) ──────────────
+
+model IntelUser {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String?         @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  messageCount  Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  accounts      IntelAccount[]
+  sessions      IntelSession[]
+  submissions   IntelSubmission[]
+  enrollments   IntelEnrollment[]
+
+  @@map("intel_users")
+}
+
+model IntelAccount {
+  id                String    @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?   @db.Text
+  session_state     String?
+  user              IntelUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("intel_accounts")
+}
+
+model IntelSession {
+  id           String    @id @default(cuid())
+  sessionToken String    @unique
+  userId       String
+  expires      DateTime
+  user         IntelUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("intel_sessions")
+}
+
+model IntelVerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("intel_verification_tokens")
+}
+
+model IntelSubmission {
+  id        String    @id @default(cuid())
+  userId    String
+  problemId Int
+  language  String
+  code      String    @db.Text
+  status    String
+  runtime   Int?
+  memory    Float?
+  createdAt DateTime  @default(now())
+  user      IntelUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([problemId])
+  @@map("intel_submissions")
+}
+
+model IntelEnrollment {
+  id         String    @id @default(cuid())
+  userId     String?
+  name       String
+  email      String
+  phone      String?
+  courseId   String
+  courseName String
+  message    String?
+  createdAt  DateTime  @default(now())
+  user       IntelUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@map("intel_enrollments")
+}
+
+model IntelProblem {
+  id          Int      @id
+  title       String
+  slug        String   @unique
+  difficulty  String
+  category    String
+  acceptance  String
+  description String   @db.Text
+  examples    Json
+  constraints Json
+  hints       Json
+  starterCode Json
+  jsRunner    String   @db.Text
+  pyRunner    String   @db.Text
+  createdAt   DateTime @default(now())
+
+  playlistItems IntelPlaylistItem[]
+  solutions     IntelSolution[]
+
+  @@map("intel_problems")
+}
+
+model IntelPlaylist {
+  id          String @id @default(cuid())
+  name        String
+  slug        String @unique
+  description String @db.Text
+  icon        String
+  tag         String?
+  order       Int    @default(0)
+  items       IntelPlaylistItem[]
+
+  @@map("intel_playlists")
+}
+
+model IntelPlaylistItem {
+  id         String        @id @default(cuid())
+  playlistId String
+  problemId  Int
+  order      Int           @default(0)
+  playlist   IntelPlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  problem    IntelProblem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, problemId])
+  @@map("intel_playlist_items")
+}
+
+model IntelSolution {
+  id           String   @id @default(cuid())
+  problemId    Int
+  solutionType String   @default("community")  // "editorial" | "community"
+  language     String
+  approach     String
+  code         String   @db.Text
+  explanation  String   @db.Text
+  timeComplex  String
+  spaceComplex String
+  username     String?
+  runtime      Int?
+  memory       Float?
+  beats        Int?
+  createdAt    DateTime @default(now())
+  problem      IntelProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("intel_solutions")
+}

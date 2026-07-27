@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#0d1117"/>
+
+  <!-- Blue gradient definition -->
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0071e3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00c9ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0071e3;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#00c9ff;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Glow circle -->
+  <circle cx="256" cy="220" r="160" fill="url(#glow)"/>
+
+  <!-- Lightning bolt icon -->
+  <polygon points="290,80 200,270 260,270 222,432 340,210 272,210 320,80" fill="url(#grad)"/>
+
+  <!-- "Intel AI" text -->
+  <text x="256" y="470" font-family="'SF Pro Display', 'Helvetica Neue', Arial, sans-serif" font-size="72" font-weight="800" fill="white" text-anchor="middle" letter-spacing="-1">
+    Intel<tspan fill="#00c9ff"> AI</tspan>
+  </text>
+</svg>

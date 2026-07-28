@@ -292,7 +292,11 @@ function genPY(meta: FunctionMeta, cases: TestCase[]): string {
     return `c=_cases[${i}]\ntry:\n${callPre}    r=${callExpr}\n    ok=${comparison}\n    print('✓ PASS' if ok else '✗ FAIL','| ${label} | Expected:'+str(c['expected'])+'| Got:'+${gotPrint})\n    if ok:p+=1\nexcept Exception as ex:\n    print('✗ ERROR |',str(ex))`;
   }).join("\n");
 
-  return `${prefix}_cases=${JSON.stringify(cases)}
+  const pyJSON = JSON.stringify(cases)
+    .replace(/\bnull\b/g, 'None')
+    .replace(/\btrue\b/g, 'True')
+    .replace(/\bfalse\b/g, 'False');
+  return `${prefix}_cases=${pyJSON}
 p=0
 ${caseBlocks}
 print(f'\\n{p}/${total} test cases passed.')`;

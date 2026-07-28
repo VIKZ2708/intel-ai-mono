@@ -360,11 +360,11 @@ function javaCompare(returnType: LangType, compare: CompareMode, exp: unknown): 
       return `{java.util.Arrays.sort(r);int[]_e=${javaLit(exp,"int[]")};java.util.Arrays.sort(_e);ok=java.util.Arrays.equals(r,_e);}`;
     case "set":
       if (returnType === "int[][]list")
-        return `{ok=r.stream().map(a->{List<Integer>tmp=new ArrayList<>(a);Collections.sort(tmp);return tmp.toString();}).sorted().collect(Collectors.joining("|")).equals(Arrays.asList(${(exp as number[][]).map(row=>`Arrays.asList(${row.map(String).join(",")})`).join(",")}).stream().map(a->{List<Integer>tmp=new ArrayList<>(a);Collections.sort(tmp);return tmp.toString();}).sorted().collect(Collectors.joining("|")));}`;
+        return `{ok=r.stream().map(a->{List<Integer>tmp=new ArrayList<>(a);Collections.sort(tmp);return tmp.toString();}).sorted().collect(Collectors.joining("|")).equals(Arrays.<List<Integer>>asList(${(exp as number[][]).map(row=>`Arrays.<Integer>asList(${row.map(String).join(",")})`).join(",")}).stream().map(a->{List<Integer>tmp=new ArrayList<>(a);Collections.sort(tmp);return tmp.toString();}).sorted().collect(Collectors.joining("|")));}`;
       return `{ok=Arrays.stream(${javaLit(exp,"int[][]")}).map(a->{int[]t=a.clone();Arrays.sort(t);return Arrays.toString(t);}).sorted().collect(Collectors.joining("|")).equals(Arrays.stream(r).map(a->{int[]t=a.clone();Arrays.sort(t);return Arrays.toString(t);}).sorted().collect(Collectors.joining("|")));}`;
     case "rowset":
       if (returnType === "int[][]list")
-        return `{ok=r.stream().map(a->a.stream().map(String::valueOf).collect(Collectors.joining(","))).sorted().collect(Collectors.joining("|")).equals(Arrays.asList(${(exp as number[][]).map(row=>`Arrays.asList(${row.map(String).join(",")})`).join(",")}).stream().map(a->a.stream().map(String::valueOf).collect(Collectors.joining(","))).sorted().collect(Collectors.joining("|")));}`;
+        return `{ok=r.stream().map(a->a.stream().map(String::valueOf).collect(Collectors.joining(","))).sorted().collect(Collectors.joining("|")).equals(Arrays.<List<Integer>>asList(${(exp as number[][]).map(row=>`Arrays.<Integer>asList(${row.map(String).join(",")})`).join(",")}).stream().map(a->a.stream().map(String::valueOf).collect(Collectors.joining(","))).sorted().collect(Collectors.joining("|")));}`;
       return `{ok=Arrays.stream(r).map(a->Arrays.stream(a).mapToObj(String::valueOf).collect(Collectors.joining(","))).sorted().collect(Collectors.joining("|")).equals(Arrays.stream(${javaLit(exp,"int[][]")}).map(a->Arrays.stream(a).mapToObj(String::valueOf).collect(Collectors.joining(","))).sorted().collect(Collectors.joining("|")));}`;
     case "size":
       return `{ok=(r==null?0:r.size())==${exp};}`;
@@ -379,8 +379,8 @@ function javaCompare(returnType: LangType, compare: CompareMode, exp: unknown): 
         return `{ok=r.equals(Arrays.asList(${elems}));}`;
       }
       if (returnType === "int[][]list") {
-        const rows = (exp as number[][]).map(row => `Arrays.asList(${row.map(String).join(",")})`).join(",");
-        return `{ok=r.equals(Arrays.asList(${rows}));}`;
+        const rows = (exp as number[][]).map(row => `Arrays.<Integer>asList(${row.map(String).join(",")})`).join(",");
+        return `{ok=r.equals(Arrays.<List<Integer>>asList(${rows}));}`;
       }
       if (returnType === "ListNode")
         return `{ok=Arrays.equals(toArr(r),${javaLit(exp,"int[]")});}`;
@@ -427,7 +427,7 @@ function genJava(meta: FunctionMeta, cases: TestCase[]): string {
 
     let dispE: string;
     if (meta.returnType === "int[][]list" && Array.isArray(c.expected))
-      dispE = `Arrays.asList(${(c.expected as number[][]).map(r=>`Arrays.asList(${r.map(String).join(",")})`).join(",")})`;
+      dispE = `Arrays.<List<Integer>>asList(${(c.expected as number[][]).map(r=>`Arrays.<Integer>asList(${r.map(String).join(",")})`).join(",")})`;
     else if (meta.returnType === "int[]list" && Array.isArray(c.expected))
       dispE = `Arrays.asList(${(c.expected as number[]).join(",")})`;
     else if (Array.isArray(c.expected) && !Array.isArray((c.expected as unknown[])[0]))
@@ -466,7 +466,7 @@ function genJava(meta: FunctionMeta, cases: TestCase[]): string {
       (meta.returnType === "TreeNode" || meta.returnType === "TreeNodeVal") ? "TreeNode" :
       "var";
 
-    return `    {${pre}${retDecl} r=sol.${meta.name}(${args.join(",")});boolean ok=false;${cmpBlock}System.out.println((ok?"✓ PASS":"✗ FAIL")+" | ${label} | Expected:${dispE} | Got:"+${dispR});if(ok)passed++;}`;
+    return `    {${pre}${retDecl} r=sol.${meta.name}(${args.join(",")});boolean ok=false;${cmpBlock}System.out.println((ok?"✓ PASS":"✗ FAIL")+" | ${label} | Expected:"+${dispE}+" | Got:"+${dispR});if(ok)passed++;}`;
   }).join("\n");
 
   const imports = `import java.util.*;\nimport java.util.stream.*;\n`;

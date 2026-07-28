@@ -6,18 +6,18 @@ import { Problem } from "@/lib/problems";
 
 interface Message { id: number; role: "user" | "assistant"; text: string; }
 
-function getIDEResponse(input: string, problem: Problem, code: string): string {
+function getIDEResponse(input: string, problem: Problem, code: string, hintIdx: number, onHint: () => void): string {
   const q = input.toLowerCase();
 
+  // Hint requests — check specific variants BEFORE the generic "hint" check
   if (q.includes("hint") || q.includes("help") || q.includes("stuck")) {
-    return `Here's a hint for **${problem.title}**:\n\n${problem.hints[0]}\n\nWant another hint?`;
+    onHint();
+    const idx = Math.min(hintIdx, problem.hints.length - 1);
+    const hint = problem.hints[idx];
+    const hasMore = hintIdx + 1 < problem.hints.length;
+    return `Here's hint ${idx + 1} for **${problem.title}**:\n\n${hint}${hasMore ? "\n\nWant another hint? Just ask!" : "\n\nThat's all the hints — give it a try!"}`;
   }
-  if (q.includes("hint 2") || q.includes("second hint") || q.includes("more hint") || q.includes("another hint")) {
-    return problem.hints[1] ?? `That's the main hint! Try applying it step by step. What part are you confused about?`;
-  }
-  if (q.includes("hint 3") || q.includes("third hint") || q.includes("final hint")) {
-    return problem.hints[2] ?? `You have all the hints! Now try to implement it. If you're still stuck, describe what you've tried and I'll guide you further.`;
-  }
+
   if (q.includes("approach") || q.includes("how to solve") || q.includes("algorithm")) {
     const approaches: Record<string, string> = {
       Arrays: "For array problems, think about sorting, two pointers, or hash maps to reduce time complexity.",
@@ -79,6 +79,7 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
   ]);
   const [input, setInput] = useState("");
   const [hintsExpanded, setHintsExpanded] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,8 +92,13 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
     const userMsg: Message = { id: Date.now(), role: "user", text: msg };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
+    const currentHintIndex = hintIndex;
     setTimeout(() => {
-      const reply: Message = { id: Date.now() + 1, role: "assistant", text: getIDEResponse(msg, problem, code) };
+      const reply: Message = {
+        id: Date.now() + 1,
+        role: "assistant",
+        text: getIDEResponse(msg, problem, code, currentHintIndex, () => setHintIndex(i => Math.min(i + 1, problem.hints.length - 1))),
+      };
       setMessages((prev) => [...prev, reply]);
     }, 500);
   }

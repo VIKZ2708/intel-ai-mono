@@ -404,7 +404,7 @@ export default function IDEClient({
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-[#0d1117] overflow-hidden select-none">
+    <div className="h-screen flex flex-col bg-[#0d1117] overflow-hidden">
 
       {/* ── Top bar ─────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-4 h-12 bg-[#161b22] border-b border-[#21262d] flex-shrink-0">

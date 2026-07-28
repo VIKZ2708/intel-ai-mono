@@ -70,7 +70,7 @@ interface PastSubmission {
 interface TestLine { status: "pass" | "fail" | "error" | "info" | "score" | "compile_ok"; text: string; }
 
 interface SubmitResult {
-  status: "accepted" | "wrong" | "error";
+  status: "accepted" | "wrong" | "error" | "submitted";
   passed: number; total: number;
   runtime: number; memory: number;
   runtimeBeat: number; memoryBeat: number;
@@ -348,18 +348,26 @@ export default function IDEClient({
           }
         }
       } else {
-        // Java / C++ — no test runner; show compilation output only
+        // C++ (or Java without runner) — show compilation output only
         const hasErr = combined.toLowerCase().includes("error");
         setRunStatus(hasErr ? "error" : "idle");
         if (isSubmit) {
           setLines(parsed);
-          setRunStatus(hasErr ? "error" : "idle");
-          if (session?.user && !hasErr) {
-            fetch("/api/submissions", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "no_runner", runtime: null, memory: null }),
-            }).then(() => fetchHistory()).catch(() => {});
+          if (hasErr) {
+            setRunStatus("error");
+            setSubmitResult({ status: "error", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, ...fakeMetrics() });
+            setLeftTab("wrong");
+          } else {
+            setRunStatus("idle");
+            setSubmitResult({ status: "submitted", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, ...fakeMetrics() });
+            setLeftTab("accepted");
+            if (session?.user) {
+              fetch("/api/submissions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "no_runner", runtime: null, memory: null }),
+              }).then(() => fetchHistory()).catch(() => {});
+            }
           }
         }
       }
@@ -446,8 +454,14 @@ export default function IDEClient({
           {/* Tab bar */}
           <div className="flex border-b border-[#21262d] bg-[#161b22] flex-shrink-0 overflow-x-auto">
             {(leftTab === "accepted" || leftTab === "wrong") && (
-              <button className={`flex items-center gap-1.5 py-2.5 px-3 text-xs font-semibold border-b-2 whitespace-nowrap ${leftTab === "accepted" ? "border-green-500 text-green-400" : "border-red-500 text-red-400"}`}>
-                {leftTab === "accepted" ? <><CheckCircle2 className="w-3 h-3" /> Accepted</> : <><XCircle className="w-3 h-3" /> Wrong Answer</>}
+              <button className={`flex items-center gap-1.5 py-2.5 px-3 text-xs font-semibold border-b-2 whitespace-nowrap ${
+                leftTab === "accepted" && submitResult?.status === "accepted" ? "border-green-500 text-green-400" :
+                leftTab === "accepted" && submitResult?.status === "submitted" ? "border-blue-500 text-blue-400" :
+                "border-red-500 text-red-400"
+              }`}>
+                {leftTab === "accepted" && submitResult?.status === "accepted" && <><CheckCircle2 className="w-3 h-3" /> Accepted</>}
+                {leftTab === "accepted" && submitResult?.status === "submitted" && <><CheckCircle2 className="w-3 h-3" /> Submitted</>}
+                {leftTab === "wrong" && <><XCircle className="w-3 h-3" /> Wrong Answer</>}
               </button>
             )}
             {coreTabs.map((t) => (
@@ -465,6 +479,59 @@ export default function IDEClient({
           </div>
 
           <div className="flex-1 overflow-y-auto">
+
+            {/* ── COMPILE-ONLY SUBMITTED VIEW (C++) ── */}
+            {leftTab === "accepted" && submitResult?.status === "submitted" && (
+              <div className="p-5 space-y-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-full bg-blue-500/15 flex items-center justify-center">
+                    <CheckCircle2 className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-blue-400">Submitted</div>
+                    <div className="text-xs text-[#8b949e]">Compiled successfully — no automated scoring</div>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 text-xs text-[#8b949e] space-y-1.5">
+                  <p className="text-[#c9d1d9] font-medium">Your {LANGUAGES.find(l => l.id === submitResult.submittedLang)?.label} code compiled without errors.</p>
+                  <p className="text-[10px]">Automated test-case scoring (pass/fail cards) is available in <span className="text-yellow-400 font-medium">JavaScript</span>, <span className="text-blue-400 font-medium">Python</span>, and <span className="text-orange-400 font-medium">Java</span>.</p>
+                </div>
+                <div>
+                  <div className="text-[11px] text-[#8b949e] font-medium mb-2">Reference Test Cases</div>
+                  {problem.examples.slice(0, 2).map((ex, idx) => (
+                    <div key={idx} className="rounded-xl border border-[#21262d] bg-[#0d1117] font-mono text-xs overflow-hidden mb-2">
+                      <div className="flex items-center gap-2 px-3 py-2 border-b border-[#21262d] bg-[#161b22]">
+                        <div className="w-3 h-3 rounded-full border-2 border-[#30363d] flex-shrink-0" />
+                        <span className="text-[11px] text-[#8b949e] font-semibold">Case {idx + 1} — Unverified</span>
+                      </div>
+                      <div className="px-3 py-2 space-y-1">
+                        <div className="flex gap-2"><span className="text-[#8b949e] w-20 flex-shrink-0">Input:</span><span className="text-white break-all">{ex.input}</span></div>
+                        <div className="flex gap-2"><span className="text-[#8b949e] w-20 flex-shrink-0">Expected:</span><span className="text-green-300 break-all">{ex.output}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Your Solution</span>
+                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${langBadgeColor[LANGUAGES.find(l => l.id === submitResult.submittedLang)?.label ?? "C++"] ?? "text-[#8b949e] border-[#21262d]"}`}>
+                      {LANGUAGES.find(l => l.id === submitResult.submittedLang)?.label}
+                    </span>
+                  </div>
+                  <pre className="bg-[#0d1117] border border-[#21262d] rounded-lg p-3 text-xs text-[#c9d1d9] overflow-x-auto font-mono leading-relaxed whitespace-pre-wrap max-h-52">
+                    {submitResult.submittedCode}
+                  </pre>
+                </div>
+                {next && (
+                  <button
+                    onClick={() => (window.location.href = `/practice/${next.id}`)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1c2333] hover:bg-[#21262d] border border-[#21262d] text-white rounded-xl text-sm font-semibold transition-colors"
+                  >
+                    Next Problem <ArrowRight className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            )}
 
             {/* ── ACCEPTED VIEW ── */}
             {leftTab === "accepted" && submitResult?.status === "accepted" && (
@@ -904,7 +971,38 @@ export default function IDEClient({
                 <div className="space-y-3">
                   {(() => {
                     const resultLines = lines.filter(l => l.status === "pass" || l.status === "fail" || l.status === "error");
-                    const hasResults  = resultLines.length > 0;
+                    const compileOk   = lines.some(l => l.status === "compile_ok");
+
+                    // Compile-only result (C++ or Java without runner): show banner + unverified cards
+                    if (compileOk && resultLines.length === 0) {
+                      return (
+                        <>
+                          <div className="rounded-xl border border-green-500/30 bg-green-500/8 p-3 flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-green-500/15 border border-green-500/30 flex items-center justify-center flex-shrink-0">
+                              <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-green-300">Compilation Successful</p>
+                              <p className="text-[10px] text-[#6e7681] mt-0.5">Switch to JS, Python, or Java for automated test-case scoring.</p>
+                            </div>
+                          </div>
+                          {problem.examples.slice(0, 2).map((ex, idx) => (
+                            <div key={idx} className="rounded-xl border border-[#21262d] bg-[#0d1117] font-mono text-xs overflow-hidden">
+                              <div className="flex items-center gap-2 px-3 py-2 border-b border-[#21262d] bg-[#161b22]">
+                                <div className="w-3 h-3 rounded-full border-2 border-[#30363d] flex-shrink-0" />
+                                <span className="text-[11px] text-[#8b949e] font-semibold">Case {idx + 1} — Unverified</span>
+                              </div>
+                              <div className="px-3 py-2 space-y-1">
+                                <div className="flex gap-2"><span className="text-[#8b949e] w-20 flex-shrink-0">Input:</span><span className="text-white break-all">{ex.input}</span></div>
+                                <div className="flex gap-2"><span className="text-[#8b949e] w-20 flex-shrink-0">Expected:</span><span className="text-green-300 break-all">{ex.output}</span></div>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      );
+                    }
+
+                    // Normal pass/fail result cards
                     return problem.examples.slice(0, 2).map((ex, i) => {
                       const res    = resultLines[i];
                       const isPass = res?.status === "pass";
@@ -960,7 +1058,8 @@ export default function IDEClient({
                       );
                     });
                   })()}
-                  {lines.filter(l => l.status === "pass" || l.status === "fail" || l.status === "error").length === 0 && (
+                  {lines.filter(l => l.status === "pass" || l.status === "fail" || l.status === "error").length === 0 &&
+                   !lines.some(l => l.status === "compile_ok") && (
                     <p className="text-xs text-[#8b949e] pt-1">
                       Press <kbd className="px-1.5 py-0.5 bg-[#161b22] border border-[#21262d] rounded text-white text-[10px]">Run</kbd> to test ·{" "}
                       <kbd className="px-1.5 py-0.5 bg-[#0071e3]/20 border border-[#0071e3]/30 rounded text-[#0071e3] text-[10px]">Submit</kbd> to score all

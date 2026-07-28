@@ -1166,10 +1166,11 @@ export default function IDEClient({
                                       <p className="text-sm font-semibold text-green-300">Compilation Successful</p>
                                       <p className="text-[11px] text-[#8b949e] mt-0.5">Your code compiled without errors.</p>
                                       <p className="text-[10px] text-[#6e7681] mt-1">
-                                        Switch to{" "}
-                                        <span className="text-yellow-400 font-medium">JavaScript</span> or{" "}
-                                        <span className="text-blue-400 font-medium">Python</span>{" "}
-                                        for automated test-case scoring with pass/fail results.
+                                        C++ is compile-only. Switch to{" "}
+                                        <span className="text-yellow-400 font-medium">JavaScript</span>,{" "}
+                                        <span className="text-blue-400 font-medium">Python</span>, or{" "}
+                                        <span className="text-orange-400 font-medium">Java</span>{" "}
+                                        for automated test-case scoring.
                                       </p>
                                     </div>
                                   </div>

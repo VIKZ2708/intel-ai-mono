@@ -165,9 +165,8 @@ model IntelProblem {
   constraints Json
   hints       Json
   starterCode Json
-  jsRunner    String   @db.Text
-  pyRunner    String   @db.Text
-  javaRunner  String   @db.Text @default("")
+  testCases    Json?
+  functionMeta Json?
   createdAt   DateTime @default(now())
 
   playlistItems IntelPlaylistItem[]

@@ -5,6 +5,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useSession } from "next-auth/react";
 import { Problem } from "@/lib/problems";
+import { generateRunner } from "@/lib/runner-gen";
 import AITeachingAssistant from "@/components/ide/AITeachingAssistant";
 
 interface DBSolution {
@@ -257,45 +258,58 @@ export default function IDEClient({
     setSubmitResult(null);
     setLines([{ status: "info", text: isSubmit ? "⏳ Submitting your solution..." : "⏳ Running your code..." }]);
 
-    const langDef    = LANGUAGES.find((l) => l.id === lang)!;
-    const isJS       = lang === "javascript";
-    const isPY       = lang === "python";
-    const isJava     = lang === "java";
-    const javaRunner = (problem.javaRunner ?? "").trim();
-    const hasRunner  = isJS || isPY || (isJava && javaRunner.length > 0);
+    const langDef   = LANGUAGES.find((l) => l.id === lang)!;
+    const meta      = problem.functionMeta;
+    const cases     = problem.testCases;
+    const hasRunner = !!(meta && cases && cases.length > 0);
+
+    const JAVA_LIST_NODE = "class ListNode {\n  int val;\n  ListNode next;\n  ListNode() {}\n  ListNode(int val) { this.val = val; }\n  ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n}\n\n";
+    const JAVA_TREE_NODE = "class TreeNode {\n  int val;\n  TreeNode left, right;\n  TreeNode() {}\n  TreeNode(int val) { this.val = val; }\n  TreeNode(int val, TreeNode left, TreeNode right) { this.val = val; this.left = left; this.right = right; }\n}\n\n";
+    const CPP_LIST_NODE  = "struct ListNode {\n  int val;\n  ListNode *next;\n  ListNode() : val(0), next(nullptr) {}\n  ListNode(int x) : val(x), next(nullptr) {}\n  ListNode(int x, ListNode *next) : val(x), next(next) {}\n};\n\n";
+    const CPP_TREE_NODE  = "struct TreeNode {\n  int val;\n  TreeNode *left, *right;\n  TreeNode() : val(0), left(nullptr), right(nullptr) {}\n  TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n  TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n};\n\n";
 
     let fullCode = code;
-    if (isJS) fullCode = code + "\n" + problem.jsRunner;
-    if (isPY) {
-      const shim = `\nimport sys as _sys\nclass _Compat:\n    def __getattr__(self, name):\n        fn = _sys.modules['__main__'].__dict__.get(name)\n        if fn and callable(fn): return fn\n        raise AttributeError(f"'{name}' not found as class method or standalone function")\ntry:\n    _sol_compat = Solution()\nexcept NameError:\n    _sol_compat = _Compat()\nSolution = lambda: _sol_compat\n`;
-      fullCode = shim + code + "\n" + problem.pyRunner;
-    }
-    if (isJava) {
-      const JAVA_LIST_NODE =
-        "class ListNode {\n  int val;\n  ListNode next;\n  ListNode() {}\n  ListNode(int val) { this.val = val; }\n  ListNode(int val, ListNode next) { this.val = val; this.next = next; }\n}\n\n";
-      const JAVA_TREE_NODE =
-        "class TreeNode {\n  int val;\n  TreeNode left, right;\n  TreeNode() {}\n  TreeNode(int val) { this.val = val; }\n  TreeNode(int val, TreeNode left, TreeNode right) { this.val = val; this.left = left; this.right = right; }\n}\n\n";
-      let header = "import java.util.*;\nimport java.util.stream.*;\nimport java.io.*;\n\n";
-      const needsListNode = (code.includes("ListNode") || javaRunner.includes("ListNode")) && !code.includes("class ListNode");
-      const needsTreeNode = (code.includes("TreeNode") || javaRunner.includes("TreeNode")) && !code.includes("class TreeNode");
-      if (needsListNode) header += JAVA_LIST_NODE;
-      if (needsTreeNode) header += JAVA_TREE_NODE;
-      const userBody = code.trimStart().replace(/^(import\s+[\w.*]+;\s*\r?\n)*/g, "");
-      if (javaRunner.length > 0) {
-        fullCode = header + userBody + "\n" + javaRunner;
+
+    if (hasRunner) {
+      const runner = generateRunner(
+        lang as "javascript" | "python" | "java" | "cpp",
+        meta!,
+        cases!
+      );
+
+      if (lang === "javascript") {
+        fullCode = code + runner;
+      } else if (lang === "python") {
+        const shim = `\nimport sys as _sys\nclass _Compat:\n    def __getattr__(self, name):\n        fn = _sys.modules['__main__'].__dict__.get(name)\n        if fn and callable(fn): return fn\n        raise AttributeError(f"'{name}' not found as class method or standalone function")\ntry:\n    _sol_compat = Solution()\nexcept NameError:\n    _sol_compat = _Compat()\nSolution = lambda: _sol_compat\n`;
+        fullCode = shim + code + "\n" + runner;
+      } else if (lang === "java") {
+        const needsList = (code.includes("ListNode") || runner.includes("ListNode")) && !code.includes("class ListNode");
+        const needsTree = (code.includes("TreeNode") || runner.includes("TreeNode")) && !code.includes("class TreeNode");
+        const structs = (needsList ? JAVA_LIST_NODE : "") + (needsTree ? JAVA_TREE_NODE : "");
+        const userBody = code.trimStart().replace(/^(import\s+[\w.*]+;\s*\r?\n)*/g, "");
+        const runnerBody = runner.replace(/^(import\s+[\w.*]+;\s*\r?\n)*/g, "");
+        fullCode = "import java.util.*;\nimport java.util.stream.*;\n\n" + structs + userBody + "\n" + runnerBody;
       } else {
-        fullCode = header + userBody;
-        if (!fullCode.includes("class Main")) {
-          fullCode += "\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"✔ COMPILE_OK\");\n  }\n}";
-        }
+        // cpp
+        const needsList = (code.includes("ListNode") || runner.includes("ListNode")) && !code.includes("struct ListNode");
+        const needsTree = (code.includes("TreeNode") || runner.includes("TreeNode")) && !code.includes("struct TreeNode");
+        const structs = (needsList ? CPP_LIST_NODE : "") + (needsTree ? CPP_TREE_NODE : "");
+        const userBody = code.trimStart().replace(/^(#include\s*<[^>]+>\s*\r?\n)*(using\s+namespace\s+\w+;\s*\r?\n)?/, "");
+        fullCode = "#include <bits/stdc++.h>\nusing namespace std;\n\n" + structs + userBody + "\n" + runner;
       }
-    }
-    if (lang === "cpp") {
-      const cppHeader = "#include <bits/stdc++.h>\nusing namespace std;\n\n";
-      const withHeader = code.trimStart().startsWith("#include") ? code : cppHeader + code;
-      fullCode = withHeader.includes("int main")
-        ? withHeader
-        : withHeader + "\nint main() {\n  cout << \"✔ COMPILE_OK\" << endl;\n  return 0;\n}";
+    } else {
+      // No test cases — compile-check only for Java/C++
+      if (lang === "java") {
+        const userBody = code.trimStart().replace(/^(import\s+[\w.*]+;\s*\r?\n)*/g, "");
+        fullCode = "import java.util.*;\n\n" + userBody;
+        if (!fullCode.includes("class Main"))
+          fullCode += "\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"✔ COMPILE_OK\");\n  }\n}";
+      } else if (lang === "cpp") {
+        const withHeader = code.trimStart().startsWith("#include") ? code : "#include <bits/stdc++.h>\nusing namespace std;\n\n" + code;
+        fullCode = withHeader.includes("int main")
+          ? withHeader
+          : withHeader + "\nint main() {\n  cout << \"✔ COMPILE_OK\" << endl;\n  return 0;\n}";
+      }
     }
 
     try {

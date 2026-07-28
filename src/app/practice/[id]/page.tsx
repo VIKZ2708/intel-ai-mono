@@ -51,10 +51,9 @@ export default async function ProblemPage({
     examples:    raw.examples    as unknown as Problem["examples"],
     constraints: raw.constraints as unknown as Problem["constraints"],
     hints:       raw.hints       as unknown as Problem["hints"],
-    starterCode: raw.starterCode as unknown as Problem["starterCode"],
-    jsRunner:    raw.jsRunner,
-    pyRunner:    raw.pyRunner,
-    javaRunner:  raw.javaRunner,
+    starterCode:  raw.starterCode  as unknown as Problem["starterCode"],
+    testCases:    (raw.testCases   as unknown as Problem["testCases"])   ?? null,
+    functionMeta: (raw.functionMeta as unknown as Problem["functionMeta"]) ?? null,
   };
 
   return (

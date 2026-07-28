@@ -91,43 +91,6 @@ const newProblems = [
       java: `class Solution {\n    public java.util.List<java.util.List<Integer>> threeSum(int[] nums) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<int>> threeSum(vector<int>& nums) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const norm=arr=>(arr||[]).map(a=>[...a].sort((x,y)=>x-y)).sort((a,b)=>a.join()>b.join()?1:a.join()<b.join()?-1:0).map(a=>a.join()).join('|');
-const cases=[
-  {n:[-1,0,1,2,-1,-4],e:[[-1,-1,2],[-1,0,1]]},
-  {n:[0,1,1],e:[]},
-  {n:[0,0,0],e:[[0,0,0]]},
-  {n:[-2,0,1,1,2],e:[[-2,0,2],[-2,1,1]]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=threeSum([...c.n]);
-    const ok=norm(r)===norm(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| nums=['+c.n+'] | Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-def norm(arr): return '|'.join(sorted([','.join(map(str,sorted(a))) for a in (arr or [])]))
-cases=[
-    {'n':[-1,0,1,2,-1,-4],'e':[[-1,-1,2],[-1,0,1]]},
-    {'n':[0,1,1],'e':[]},
-    {'n':[0,0,0],'e':[[0,0,0]]},
-    {'n':[-2,0,1,1,2],'e':[[-2,0,2],[-2,1,1]]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.threeSum(c['n'][:])
-        ok=norm(r)==norm(c['e'])
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 12. Container With Most Water ────────────────────────────────────────────
@@ -155,37 +118,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int maxArea(int[] height) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int maxArea(vector<int>& height) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {h:[1,8,6,2,5,4,8,3,7],e:49},{h:[1,1],e:1},
-  {h:[4,3,2,1,4],e:16},{h:[1,2,1],e:2},{h:[2,3,4,5,18,17,6],e:17},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=maxArea([...c.h]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'h':[1,8,6,2,5,4,8,3,7],'e':49},{'h':[1,1],'e':1},
-    {'h':[4,3,2,1,4],'e':16},{'h':[1,2,1],'e':2},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.maxArea(c['h'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 13. Invert Binary Tree ────────────────────────────────────────────────────
@@ -214,43 +146,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public TreeNode invertTree(TreeNode root) {\n        return root;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    TreeNode* invertTree(TreeNode* root) {\n        return root;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[4,2,7,1,3,6,9],e:[4,7,2,9,6,3,1]},
-  {t:[2,1,3],e:[2,3,1]},
-  {t:[],e:[]},
-  {t:[1],e:[1]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=treeToArr(invertTree(buildTree([...c.t])));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[4,2,7,1,3,6,9],'e':[4,7,2,9,6,3,1]},
-    {'t':[2,1,3],'e':[2,3,1]},
-    {'t':[],'e':[]},
-    {'t':[1],'e':[1]},
-]
-p=0
-for c in cases:
-    try:
-        r=tree_to_arr(sol.invertTree(build_tree(c['t'])))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 14. Maximum Depth of Binary Tree ─────────────────────────────────────────
@@ -278,39 +173,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int maxDepth(TreeNode root) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int maxDepth(TreeNode* root) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[3,9,20,null,null,15,7],e:3},{t:[1,null,2],e:2},
-  {t:[],e:0},{t:[1],e:1},{t:[1,2,3,4,5],e:3},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=maxDepth(buildTree([...c.t]));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[3,9,20,None,None,15,7],'e':3},{'t':[1,None,2],'e':2},
-    {'t':[],'e':0},{'t':[1],'e':1},{'t':[1,2,3,4,5],'e':3},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.maxDepth(build_tree(c['t']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 17. Binary Tree Level Order Traversal ────────────────────────────────────
@@ -339,39 +201,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<java.util.List<Integer>> levelOrder(TreeNode root) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[3,9,20,null,null,15,7],e:[[3],[9,20],[15,7]]},
-  {t:[1],e:[[1]]},{t:[],e:[]},{t:[1,2,3,4,5],e:[[1],[2,3],[4,5]]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=levelOrder(buildTree([...c.t]));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[3,9,20,None,None,15,7],'e':[[3],[9,20],[15,7]]},
-    {'t':[1],'e':[[1]]},{'t':[],'e':[]},{'t':[1,2,3,4,5],'e':[[1],[2,3],[4,5]]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.levelOrder(build_tree(c['t']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 31. Valid Palindrome ──────────────────────────────────────────────────────
@@ -399,43 +228,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean isPalindrome(String s) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool isPalindrome(string s) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {s:"A man, a plan, a canal: Panama",e:true},
-  {s:"race a car",e:false},
-  {s:" ",e:true},
-  {s:"0P",e:false},
-  {s:"Was it a car or a cat I saw?",e:true},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=isPalindrome(c.s);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| s='+JSON.stringify(c.s)+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'s':"A man, a plan, a canal: Panama",'e':True},
-    {'s':"race a car",'e':False},
-    {'s':" ",'e':True},
-    {'s':"0P",'e':False},
-    {'s':"Was it a car or a cat I saw?",'e':True},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.isPalindrome(c['s'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 32. Linked List Cycle ─────────────────────────────────────────────────────
@@ -464,62 +256,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean hasCycle(ListNode head) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_LIST}
-function makeCycle(arr,pos){
-  const head=toList(arr);
-  if(pos<0)return head;
-  let tail=head,entry=null,i=0;
-  let cur=head;
-  while(cur.next){if(i===pos)entry=cur;cur=cur.next;i++;}
-  if(i===pos)entry=cur;
-  cur.next=entry;return head;
-}
-const cases=[
-  {a:[3,2,0,-4],pos:1,e:true},
-  {a:[1,2],pos:0,e:true},
-  {a:[1],pos:-1,e:false},
-  {a:[],pos:-1,e:false},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=hasCycle(makeCycle([...c.a],c.pos));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| pos='+c.pos+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_LIST}
-def make_cycle(arr,pos):
-    head=to_list(arr)
-    if pos<0 or not head:return head
-    entry=None;cur=head;i=0
-    while cur.next:
-        if i==pos:entry=cur
-        cur=cur.next;i+=1
-    if i==pos:entry=cur
-    cur.next=entry
-    return head
-sol=Solution()
-cases=[
-    {'a':[3,2,0,-4],'pos':1,'e':True},
-    {'a':[1,2],'pos':0,'e':True},
-    {'a':[1],'pos':-1,'e':False},
-    {'a':[],'pos':-1,'e':False},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.hasCycle(make_cycle(c['a'][:],c['pos']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 33. Merge Two Sorted Lists ────────────────────────────────────────────────
@@ -548,44 +284,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {\n        return null;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {\n        return nullptr;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_LIST}
-const cases=[
-  {a:[1,2,4],b:[1,3,4],e:[1,1,2,3,4,4]},
-  {a:[],b:[],e:[]},
-  {a:[],b:[0],e:[0]},
-  {a:[1,3,5],b:[2,4,6],e:[1,2,3,4,5,6]},
-  {a:[5],b:[1,2,3],e:[1,2,3,5]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=toArr(mergeTwoLists(toList(c.a),toList(c.b)));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_LIST}
-sol=Solution()
-cases=[
-    {'a':[1,2,4],'b':[1,3,4],'e':[1,1,2,3,4,4]},
-    {'a':[],'b':[],'e':[]},
-    {'a':[],'b':[0],'e':[0]},
-    {'a':[1,3,5],'b':[2,4,6],'e':[1,2,3,4,5,6]},
-]
-p=0
-for c in cases:
-    try:
-        r=to_arr(sol.mergeTwoLists(to_list(c['a']),to_list(c['b'])))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 34. Valid Anagram ─────────────────────────────────────────────────────────
@@ -613,39 +311,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean isAnagram(String s, String t) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool isAnagram(string s, string t) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {s:'anagram',t:'nagaram',e:true},{s:'rat',t:'car',e:false},
-  {s:'a',t:'a',e:true},{s:'ab',t:'a',e:false},
-  {s:'listen',t:'silent',e:true},{s:'hello',t:'world',e:false},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=isAnagram(c.s,c.t);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| s='+c.s+' t='+c.t+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'s':'anagram','t':'nagaram','e':True},{'s':'rat','t':'car','e':False},
-    {'s':'a','t':'a','e':True},{'s':'ab','t':'a','e':False},
-    {'s':'listen','t':'silent','e':True},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.isAnagram(c['s'],c['t'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 35. Single Number ─────────────────────────────────────────────────────────
@@ -673,37 +338,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int singleNumber(int[] nums) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int singleNumber(vector<int>& nums) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[2,2,1],e:1},{n:[4,1,2,1,2],e:4},{n:[1],e:1},
-  {n:[0,1,0],e:1},{n:[17],e:17},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=singleNumber([...c.n]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[2,2,1],'e':1},{'n':[4,1,2,1,2],'e':4},{'n':[1],'e':1},
-    {'n':[0,1,0],'e':1},{'n':[17],'e':17},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.singleNumber(c['n'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 36. Missing Number ────────────────────────────────────────────────────────
@@ -731,37 +365,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int missingNumber(int[] nums) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[3,0,1],e:2},{n:[0,1],e:2},{n:[9,6,4,2,3,5,7,0,1],e:8},
-  {n:[0],e:1},{n:[1],e:0},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=missingNumber([...c.n]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[3,0,1],'e':2},{'n':[0,1],'e':2},{'n':[9,6,4,2,3,5,7,0,1],'e':8},
-    {'n':[0],'e':1},{'n':[1],'e':0},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.missingNumber(c['n'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 37. Number of 1 Bits ──────────────────────────────────────────────────────
@@ -789,35 +392,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int hammingWeight(int n) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int hammingWeight(int n) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:11,e:3},{n:128,e:1},{n:2147483645,e:30},{n:1,e:1},{n:4294967293,e:31},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=hammingWeight(c.n);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| n='+c.n+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':11,'e':3},{'n':128,'e':1},{'n':2147483645,'e':30},{'n':1,'e':1},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.hammingWeight(c['n'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| n='+str(c['n'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 38. Counting Bits ─────────────────────────────────────────────────────────
@@ -844,37 +418,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int[] countBits(int n) {\n        return new int[0];\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<int> countBits(int n) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:2,e:[0,1,1]},{n:5,e:[0,1,1,2,1,2]},
-  {n:0,e:[0]},{n:1,e:[0,1]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=countBits(c.n);
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| n='+c.n+'| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':2,'e':[0,1,1]},{'n':5,'e':[0,1,1,2,1,2]},
-    {'n':0,'e':[0]},{'n':1,'e':[0,1]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.countBits(c['n'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| n='+str(c['n'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 39. Same Tree ─────────────────────────────────────────────────────────────
@@ -901,39 +444,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean isSameTree(TreeNode p, TreeNode q) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool isSameTree(TreeNode* p, TreeNode* q) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {p:[1,2,3],q:[1,2,3],e:true},{p:[1,2],q:[1,null,2],e:false},
-  {p:[1,2,1],q:[1,1,2],e:false},{p:[],q:[],e:true},{p:[1],q:[1],e:true},
-];
-let p2=0;
-for(const c of cases){
-  try{
-    const r=isSameTree(buildTree([...c.p]),buildTree([...c.q]));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p2++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p2+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'p':[1,2,3],'q':[1,2,3],'e':True},{'p':[1,2],'q':[1,None,2],'e':False},
-    {'p':[1,2,1],'q':[1,1,2],'e':False},{'p':[],'q':[],'e':True},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.isSameTree(build_tree(c['p']),build_tree(c['q']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 40. Symmetric Tree ────────────────────────────────────────────────────────
@@ -961,39 +471,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean isSymmetric(TreeNode root) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool isSymmetric(TreeNode* root) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[1,2,2,3,4,4,3],e:true},{t:[1,2,2,null,3,null,3],e:false},
-  {t:[1],e:true},{t:[1,2,2],e:true},{t:[1,2,3],e:false},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=isSymmetric(buildTree([...c.t]));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[1,2,2,3,4,4,3],'e':True},{'t':[1,2,2,None,3,None,3],'e':False},
-    {'t':[1],'e':True},{'t':[1,2,2],'e':True},{'t':[1,2,3],'e':False},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.isSymmetric(build_tree(c['t']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 41. Validate Binary Search Tree ──────────────────────────────────────────
@@ -1021,40 +498,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean isValidBST(TreeNode root) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool isValidBST(TreeNode* root) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[2,1,3],e:true},{t:[5,1,4,null,null,3,6],e:false},
-  {t:[1],e:true},{t:[5,4,6,null,null,3,7],e:false},
-  {t:[2,1,3],e:true},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=isValidBST(buildTree([...c.t]));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[2,1,3],'e':True},{'t':[5,1,4,None,None,3,6],'e':False},
-    {'t':[1],'e':True},{'t':[5,4,6,None,None,3,7],'e':False},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.isValidBST(build_tree(c['t']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 42. Lowest Common Ancestor of BST ────────────────────────────────────────
@@ -1083,48 +526,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {\n        return null;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {\n        return nullptr;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-function findNode(root,val){if(!root)return null;if(root.val===val)return root;return findNode(root.left,val)||findNode(root.right,val);}
-const cases=[
-  {t:[6,2,8,0,4,7,9,null,null,3,5],p:2,q:8,e:6},
-  {t:[6,2,8,0,4,7,9,null,null,3,5],p:2,q:4,e:2},
-  {t:[2,1],p:2,q:1,e:2},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const root=buildTree([...c.t]);
-    const r=lowestCommonAncestor(root,findNode(root,c.p),findNode(root,c.q));
-    const ok=r&&r.val===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+(r?r.val:'null'));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-def find_node(root,val):
-    if not root:return None
-    if root.val==val:return root
-    return find_node(root.left,val) or find_node(root.right,val)
-sol=Solution()
-cases=[
-    {'t':[6,2,8,0,4,7,9,None,None,3,5],'p':2,'q':8,'e':6},
-    {'t':[6,2,8,0,4,7,9,None,None,3,5],'p':2,'q':4,'e':2},
-    {'t':[2,1],'p':2,'q':1,'e':2},
-]
-p=0
-for c in cases:
-    try:
-        root=build_tree(c['t'])
-        r=sol.lowestCommonAncestor(root,find_node(root,c['p']),find_node(root,c['q']))
-        ok=r is not None and r.val==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+(str(r.val) if r else 'None'))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 43. Kth Smallest Element in a BST ────────────────────────────────────────
@@ -1151,39 +552,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int kthSmallest(TreeNode root, int k) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int kthSmallest(TreeNode* root, int k) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[3,1,4,null,2],k:1,e:1},{t:[5,3,6,2,4,null,null,1],k:3,e:3},
-  {t:[1],k:1,e:1},{t:[3,1,4,null,2],k:2,e:2},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=kthSmallest(buildTree([...c.t]),c.k);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| k='+c.k+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[3,1,4,None,2],'k':1,'e':1},{'t':[5,3,6,2,4,None,None,1],'k':3,'e':3},
-    {'t':[1],'k':1,'e':1},{'t':[3,1,4,None,2],'k':2,'e':2},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.kthSmallest(build_tree(c['t']),c['k'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| k='+str(c['k'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 44. Binary Tree Right Side View ──────────────────────────────────────────
@@ -1211,39 +579,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<Integer> rightSideView(TreeNode root) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<int> rightSideView(TreeNode* root) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[1,2,3,null,5,null,4],e:[1,3,4]},{t:[1,null,3],e:[1,3]},
-  {t:[],e:[]},{t:[1,2,3,4],e:[1,3,4]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=rightSideView(buildTree([...c.t]));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[1,2,3,None,5,None,4],'e':[1,3,4]},{'t':[1,None,3],'e':[1,3]},
-    {'t':[],'e':[]},{'t':[1,2,3,4],'e':[1,3,4]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.rightSideView(build_tree(c['t']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 45. Group Anagrams ────────────────────────────────────────────────────────
@@ -1271,39 +606,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<java.util.List<String>> groupAnagrams(String[] strs) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<string>> groupAnagrams(vector<string>& strs) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const norm=arr=>arr.map(g=>[...g].sort().join()).sort().join('|');
-const cases=[
-  {s:['eat','tea','tan','ate','nat','bat'],e:[['bat'],['nat','tan'],['ate','eat','tea']]},
-  {s:[''],e:[['']]},{s:['a'],e:[['a']]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=groupAnagrams([...c.s]);
-    const ok=norm(r)===norm(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected groups:'+c.e.length+'| Got groups:'+r.length);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-def norm(arr): return '|'.join(sorted([','.join(sorted(g)) for g in arr]))
-cases=[
-    {'s':['eat','tea','tan','ate','nat','bat'],'e':[['bat'],['nat','tan'],['ate','eat','tea']]},
-    {'s':[''],'e':[['']]},{'s':['a'],'e':[['a']]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.groupAnagrams(c['s'][:])
-        ok=norm(r)==norm(c['e'])
-        print('✓ PASS' if ok else '✗ FAIL','| groups expected:'+str(len(c['e']))+'| got:'+str(len(r)))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 46. Longest Consecutive Sequence ─────────────────────────────────────────
@@ -1331,37 +633,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int longestConsecutive(int[] nums) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int longestConsecutive(vector<int>& nums) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[100,4,200,1,3,2],e:4},{n:[0,3,7,2,5,8,4,6,0,1],e:9},
-  {n:[],e:0},{n:[1],e:1},{n:[1,2,0,1],e:3},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=longestConsecutive([...c.n]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[100,4,200,1,3,2],'e':4},{'n':[0,3,7,2,5,8,4,6,0,1],'e':9},
-    {'n':[],'e':0},{'n':[1],'e':1},{'n':[1,2,0,1],'e':3},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.longestConsecutive(c['n'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 47. Search in Rotated Sorted Array ───────────────────────────────────────
@@ -1390,37 +661,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int search(int[] nums, int target) {\n        return -1;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        return -1;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[4,5,6,7,0,1,2],t:0,e:4},{n:[4,5,6,7,0,1,2],t:3,e:-1},
-  {n:[1],t:0,e:-1},{n:[1],t:1,e:0},{n:[3,1],t:1,e:1},{n:[5,1,3],t:3,e:2},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=search([...c.n],c.t);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| target='+c.t+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[4,5,6,7,0,1,2],'t':0,'e':4},{'n':[4,5,6,7,0,1,2],'t':3,'e':-1},
-    {'n':[1],'t':0,'e':-1},{'n':[1],'t':1,'e':0},{'n':[3,1],'t':1,'e':1},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.search(c['n'][:],c['t'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| target='+str(c['t'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 48. Search a 2D Matrix ────────────────────────────────────────────────────
@@ -1447,39 +687,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean searchMatrix(int[][] matrix, int target) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool searchMatrix(vector<vector<int>>& matrix, int target) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {m:[[1,3,5,7],[10,11,16,20],[23,30,34,60]],t:3,e:true},
-  {m:[[1,3,5,7],[10,11,16,20],[23,30,34,60]],t:13,e:false},
-  {m:[[1]],t:0,e:false},{m:[[1]],t:1,e:true},{m:[[1,3],[2,6]],t:2,e:false},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=searchMatrix(c.m.map(r=>[...r]),c.t);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| target='+c.t+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'m':[[1,3,5,7],[10,11,16,20],[23,30,34,60]],'t':3,'e':True},
-    {'m':[[1,3,5,7],[10,11,16,20],[23,30,34,60]],'t':13,'e':False},
-    {'m':[[1]],'t':0,'e':False},{'m':[[1]],'t':1,'e':True},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.searchMatrix([row[:] for row in c['m']],c['t'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| target='+str(c['t'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 49. Top K Frequent Elements ───────────────────────────────────────────────
@@ -1507,37 +714,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int[] topKFrequent(int[] nums, int k) {\n        return new int[0];\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<int> topKFrequent(vector<int>& nums, int k) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[1,1,1,2,2,3],k:2,e:[1,2]},{n:[1],k:1,e:[1]},
-  {n:[1,2],k:2,e:[1,2]},{n:[4,1,1,1,2,2,3],k:2,e:[1,2]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=topKFrequent([...c.n],c.k);
-    const ok=Array.isArray(r)&&r.length===c.k&&[...r].sort((a,b)=>a-b).join()===c.e.slice().sort((a,b)=>a-b).join();
-    console.log(ok?'✓ PASS':'✗ FAIL','| k='+c.k+'| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[1,1,1,2,2,3],'k':2,'e':[1,2]},{'n':[1],'k':1,'e':[1]},
-    {'n':[1,2],'k':2,'e':[1,2]},{'n':[4,1,1,1,2,2,3],'k':2,'e':[1,2]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.topKFrequent(c['n'][:],c['k'])
-        ok=isinstance(r,list) and len(r)==c['k'] and sorted(r)==sorted(c['e'])
-        print('✓ PASS' if ok else '✗ FAIL','| k='+str(c['k'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 50. Kth Largest Element in an Array ──────────────────────────────────────
@@ -1565,37 +741,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int findKthLargest(int[] nums, int k) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int findKthLargest(vector<int>& nums, int k) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[3,2,1,5,6,4],k:2,e:5},{n:[3,2,3,1,2,4,5,5,6],k:4,e:4},
-  {n:[1],k:1,e:1},{n:[2,1],k:2,e:1},{n:[7,6,5,4,3,2,1],k:5,e:3},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=findKthLargest([...c.n],c.k);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| k='+c.k+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[3,2,1,5,6,4],'k':2,'e':5},{'n':[3,2,3,1,2,4,5,5,6],'k':4,'e':4},
-    {'n':[1],'k':1,'e':1},{'n':[2,1],'k':2,'e':1},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.findKthLargest(c['n'][:],c['k'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| k='+str(c['k'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 51. Insert Interval ──────────────────────────────────────────────────────
@@ -1623,43 +768,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int[][] insert(int[][] intervals, int[] newInterval) {\n        return new int[0][];\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-const cases=[
-  {i:[[1,3],[6,9]],n:[2,5],e:[[1,5],[6,9]]},
-  {i:[[1,2],[3,5],[6,7],[8,10],[12,16]],n:[4,8],e:[[1,2],[3,10],[12,16]]},
-  {i:[],n:[5,7],e:[[5,7]]},
-  {i:[[1,5]],n:[2,3],e:[[1,5]]},
-  {i:[[1,5]],n:[6,8],e:[[1,5],[6,8]]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=insert(c.i.map(x=>[...x]),[...c.n]);
-    const ok=eq(r,c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'i':[[1,3],[6,9]],'n':[2,5],'e':[[1,5],[6,9]]},
-    {'i':[[1,2],[3,5],[6,7],[8,10],[12,16]],'n':[4,8],'e':[[1,2],[3,10],[12,16]]},
-    {'i':[],'n':[5,7],'e':[[5,7]]},
-    {'i':[[1,5]],'n':[2,3],'e':[[1,5]]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.insert([x[:] for x in c['i']],c['n'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 52. Non-overlapping Intervals ────────────────────────────────────────────
@@ -1688,41 +796,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int eraseOverlapIntervals(int[][] intervals) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int eraseOverlapIntervals(vector<vector<int>>& intervals) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {i:[[1,2],[2,3],[3,4],[1,3]],e:1},
-  {i:[[1,2],[1,2],[1,2]],e:2},
-  {i:[[1,2],[2,3]],e:0},
-  {i:[[1,100],[11,22],[1,11],[2,12]],e:2},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=eraseOverlapIntervals(c.i.map(x=>[...x]));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'i':[[1,2],[2,3],[3,4],[1,3]],'e':1},
-    {'i':[[1,2],[1,2],[1,2]],'e':2},
-    {'i':[[1,2],[2,3]],'e':0},
-    {'i':[[1,100],[11,22],[1,11],[2,12]],'e':2},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.eraseOverlapIntervals([x[:] for x in c['i']])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 53. Gas Station ──────────────────────────────────────────────────────────
@@ -1750,41 +823,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int canCompleteCircuit(int[] gas, int[] cost) {\n        return -1;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {\n        return -1;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {g:[1,2,3,4,5],c:[3,4,5,1,2],e:3},
-  {g:[2,3,4],c:[3,4,3],e:-1},
-  {g:[5,1,2,3,4],c:[4,4,1,5,1],e:4},
-  {g:[2],c:[2],e:0},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=canCompleteCircuit([...c.g],[...c.c]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'g':[1,2,3,4,5],'c':[3,4,5,1,2],'e':3},
-    {'g':[2,3,4],'c':[3,4,3],'e':-1},
-    {'g':[5,1,2,3,4],'c':[4,4,1,5,1],'e':4},
-    {'g':[2],'c':[2],'e':0},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.canCompleteCircuit(c['g'][:],c['c'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 54. Partition Labels ──────────────────────────────────────────────────────
@@ -1812,41 +850,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<Integer> partitionLabels(String s) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<int> partitionLabels(string s) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {s:'ababcbacadefegdehijhklij',e:[9,7,8]},
-  {s:'eccbbbbdec',e:[10]},
-  {s:'a',e:[1]},
-  {s:'ab',e:[1,1]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=partitionLabels(c.s);
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'s':'ababcbacadefegdehijhklij','e':[9,7,8]},
-    {'s':'eccbbbbdec','e':[10]},
-    {'s':'a','e':[1]},
-    {'s':'ab','e':[1,1]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.partitionLabels(c['s'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 55. House Robber II ───────────────────────────────────────────────────────
@@ -1874,37 +877,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int rob(int[] nums) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int rob(vector<int>& nums) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[2,3,2],e:3},{n:[1,2,3,1],e:4},{n:[1,2,3],e:3},
-  {n:[1],e:1},{n:[1,2],e:2},{n:[200,3,140,20,10],e:340},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=rob([...c.n]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[2,3,2],'e':3},{'n':[1,2,3,1],'e':4},{'n':[1,2,3],'e':3},
-    {'n':[1],'e':1},{'n':[1,2],'e':2},{'n':[200,3,140,20,10],'e':340},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.rob(c['n'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 56. Maximum Product Subarray ─────────────────────────────────────────────
@@ -1932,37 +904,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int maxProduct(int[] nums) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int maxProduct(vector<int>& nums) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:[2,3,-2,4],e:6},{n:[-2,0,-1],e:0},{n:[-2],e:-2},
-  {n:[-2,3,-4],e:24},{n:[0,2],e:2},{n:[3,-1,4],e:4},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=maxProduct([...c.n]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':[2,3,-2,4],'e':6},{'n':[-2,0,-1],'e':0},{'n':[-2],'e':-2},
-    {'n':[-2,3,-4],'e':24},{'n':[0,2],'e':2},{'n':[3,-1,4],'e':4},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.maxProduct(c['n'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 57. Decode Ways ───────────────────────────────────────────────────────────
@@ -1991,37 +932,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int numDecodings(String s) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int numDecodings(string s) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {s:'12',e:2},{s:'226',e:3},{s:'06',e:0},
-  {s:'0',e:0},{s:'1',e:1},{s:'11106',e:2},{s:'10',e:1},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=numDecodings(c.s);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| s='+c.s+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'s':'12','e':2},{'s':'226','e':3},{'s':'06','e':0},
-    {'s':'0','e':0},{'s':'1','e':1},{'s':'11106','e':2},{'s':'10','e':1},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.numDecodings(c['s'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| s='+c['s']+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 58. Max Area of Island ────────────────────────────────────────────────────
@@ -2049,43 +959,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int maxAreaOfIsland(int[][] grid) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int maxAreaOfIsland(vector<vector<int>>& grid) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const clone=g=>g.map(r=>[...r]);
-const cases=[
-  {g:[[0,0,1,0],[0,1,1,0],[0,1,0,0],[0,0,0,1]],e:4},
-  {g:[[0,0,0,0,0,0,0,0]],e:0},
-  {g:[[1,1],[1,0]],e:3},
-  {g:[[1]],e:1},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=maxAreaOfIsland(clone(c.g));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-import copy
-sol=Solution()
-cases=[
-    {'g':[[0,0,1,0],[0,1,1,0],[0,1,0,0],[0,0,0,1]],'e':4},
-    {'g':[[0,0,0,0,0,0,0,0]],'e':0},
-    {'g':[[1,1],[1,0]],'e':3},
-    {'g':[[1]],'e':1},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.maxAreaOfIsland(copy.deepcopy(c['g']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 59. Pacific Atlantic Water Flow ──────────────────────────────────────────
@@ -2114,40 +987,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<java.util.List<Integer>> pacificAtlantic(int[][] heights) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<int>> pacificAtlantic(vector<vector<int>>& heights) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {h:[[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]],e:[[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]},
-  {h:[[1]],e:[[0,0]]},
-  {h:[[1,2],[2,1]],e:[[0,1],[1,0]]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=pacificAtlantic(c.h.map(row=>[...row]));
-    const norm=a=>a.map(x=>x.join()).sort().join('|');
-    const ok=norm(r)===norm(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected '+c.e.length+' cells | Got '+r.length);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'h':[[1,2,2,3,5],[3,2,3,4,4],[2,4,5,3,1],[6,7,1,4,5],[5,1,1,2,4]],'e':[[0,4],[1,3],[1,4],[2,2],[3,0],[3,1],[4,0]]},
-    {'h':[[1]],'e':[[0,0]]},
-]
-p=0
-def norm(arr): return '|'.join(sorted([str(x) for x in arr]))
-for c in cases:
-    try:
-        r=sol.pacificAtlantic([row[:] for row in c['h']])
-        ok=norm(r)==norm(c['e'])
-        print('✓ PASS' if ok else '✗ FAIL','| Expected',len(c['e']),'cells | Got',len(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 60. Remove Nth Node From End of List ─────────────────────────────────────
@@ -2176,39 +1015,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public ListNode removeNthFromEnd(ListNode head, int n) {\n        return null;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    ListNode* removeNthFromEnd(ListNode* head, int n) {\n        return nullptr;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_LIST}
-const cases=[
-  {a:[1,2,3,4,5],n:2,e:[1,2,3,5]},{a:[1],n:1,e:[]},
-  {a:[1,2],n:1,e:[1]},{a:[1,2],n:2,e:[2]},{a:[1,2,3],n:3,e:[2,3]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=toArr(removeNthFromEnd(toList(c.a),c.n));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| n='+c.n+'| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_LIST}
-sol=Solution()
-cases=[
-    {'a':[1,2,3,4,5],'n':2,'e':[1,2,3,5]},{'a':[1],'n':1,'e':[]},
-    {'a':[1,2],'n':1,'e':[1]},{'a':[1,2],'n':2,'e':[2]},
-]
-p=0
-for c in cases:
-    try:
-        r=to_arr(sol.removeNthFromEnd(to_list(c['a']),c['n']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| n='+str(c['n'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 61. Reorder List ──────────────────────────────────────────────────────────
@@ -2236,43 +1042,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public void reorderList(ListNode head) {}\n}`,
       cpp: `class Solution {\npublic:\n    void reorderList(ListNode* head) {}\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_LIST}
-const cases=[
-  {a:[1,2,3,4],e:[1,4,2,3]},{a:[1,2,3,4,5],e:[1,5,2,4,3]},
-  {a:[1],e:[1]},{a:[1,2],e:[1,2]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const head=toList(c.a);
-    reorderList(head);
-    const r=toArr(head);
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_LIST}
-sol=Solution()
-cases=[
-    {'a':[1,2,3,4],'e':[1,4,2,3]},{'a':[1,2,3,4,5],'e':[1,5,2,4,3]},
-    {'a':[1],'e':[1]},{'a':[1,2],'e':[1,2]},
-]
-p=0
-for c in cases:
-    try:
-        head=to_list(c['a'])
-        sol.reorderList(head)
-        r=to_arr(head)
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 62. Add Two Numbers ───────────────────────────────────────────────────────
@@ -2301,43 +1070,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public ListNode addTwoNumbers(ListNode l1, ListNode l2) {\n        return null;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {\n        return nullptr;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_LIST}
-const cases=[
-  {a:[2,4,3],b:[5,6,4],e:[7,0,8]},
-  {a:[0],b:[0],e:[0]},
-  {a:[9,9,9,9,9,9,9],b:[9,9,9,9],e:[8,9,9,9,0,0,0,1]},
-  {a:[1],b:[9,9],e:[0,0,1]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=toArr(addTwoNumbers(toList(c.a),toList(c.b)));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_LIST}
-sol=Solution()
-cases=[
-    {'a':[2,4,3],'b':[5,6,4],'e':[7,0,8]},
-    {'a':[0],'b':[0],'e':[0]},
-    {'a':[9,9,9,9,9,9,9],'b':[9,9,9,9],'e':[8,9,9,9,0,0,0,1]},
-    {'a':[1],'b':[9,9],'e':[0,0,1]},
-]
-p=0
-for c in cases:
-    try:
-        r=to_arr(sol.addTwoNumbers(to_list(c['a']),to_list(c['b'])))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 63. Rotate Image ──────────────────────────────────────────────────────────
@@ -2364,41 +1096,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public void rotate(int[][] matrix) {}\n}`,
       cpp: `class Solution {\npublic:\n    void rotate(vector<vector<int>>& matrix) {}\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {m:[[1,2,3],[4,5,6],[7,8,9]],e:[[7,4,1],[8,5,2],[9,6,3]]},
-  {m:[[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]],e:[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]},
-  {m:[[1]],e:[[1]]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const m=c.m.map(r=>[...r]);
-    rotate(m);
-    const ok=JSON.stringify(m)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(m));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'m':[[1,2,3],[4,5,6],[7,8,9]],'e':[[7,4,1],[8,5,2],[9,6,3]]},
-    {'m':[[5,1,9,11],[2,4,8,10],[13,3,6,7],[15,14,12,16]],'e':[[15,13,2,5],[14,3,4,1],[12,6,8,9],[16,7,10,11]]},
-    {'m':[[1]],'e':[[1]]},
-]
-p=0
-for c in cases:
-    try:
-        m=[row[:] for row in c['m']]
-        sol.rotate(m)
-        ok=m==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(m))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 64. Spiral Matrix ─────────────────────────────────────────────────────────
@@ -2426,39 +1123,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<Integer> spiralOrder(int[][] matrix) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<int> spiralOrder(vector<vector<int>>& matrix) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {m:[[1,2,3],[4,5,6],[7,8,9]],e:[1,2,3,6,9,8,7,4,5]},
-  {m:[[1,2,3,4],[5,6,7,8],[9,10,11,12]],e:[1,2,3,4,8,12,11,10,9,5,6,7]},
-  {m:[[1]],e:[1]},{m:[[1,2],[3,4]],e:[1,2,4,3]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=spiralOrder(c.m.map(r=>[...r]));
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'m':[[1,2,3],[4,5,6],[7,8,9]],'e':[1,2,3,6,9,8,7,4,5]},
-    {'m':[[1,2,3,4],[5,6,7,8],[9,10,11,12]],'e':[1,2,3,4,8,12,11,10,9,5,6,7]},
-    {'m':[[1]],'e':[1]},{'m':[[1,2],[3,4]],'e':[1,2,4,3]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.spiralOrder([row[:] for row in c['m']])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 65. Set Matrix Zeroes ─────────────────────────────────────────────────────
@@ -2486,41 +1150,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public void setZeroes(int[][] matrix) {}\n}`,
       cpp: `class Solution {\npublic:\n    void setZeroes(vector<vector<int>>& matrix) {}\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {m:[[1,1,1],[1,0,1],[1,1,1]],e:[[1,0,1],[0,0,0],[1,0,1]]},
-  {m:[[0,1,2,0],[3,4,5,2],[1,3,1,5]],e:[[0,0,0,0],[0,4,5,0],[0,3,1,0]]},
-  {m:[[1]],e:[[1]]},{m:[[0]],e:[[0]]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const m=c.m.map(r=>[...r]);
-    setZeroes(m);
-    const ok=JSON.stringify(m)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(m));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'m':[[1,1,1],[1,0,1],[1,1,1]],'e':[[1,0,1],[0,0,0],[1,0,1]]},
-    {'m':[[0,1,2,0],[3,4,5,2],[1,3,1,5]],'e':[[0,0,0,0],[0,4,5,0],[0,3,1,0]]},
-    {'m':[[1]],'e':[[1]]},{'m':[[0]],'e':[[0]]},
-]
-p=0
-for c in cases:
-    try:
-        m=[row[:] for row in c['m']]
-        sol.setZeroes(m)
-        ok=m==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(m))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 66. Happy Number ──────────────────────────────────────────────────────────
@@ -2547,35 +1176,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean isHappy(int n) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool isHappy(int n) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:19,e:true},{n:2,e:false},{n:1,e:true},{n:7,e:true},{n:4,e:false},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=isHappy(c.n);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| n='+c.n+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':19,'e':True},{'n':2,'e':False},{'n':1,'e':True},{'n':7,'e':True},{'n':4,'e':False},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.isHappy(c['n'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| n='+str(c['n'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 67. Reverse Bits ──────────────────────────────────────────────────────────
@@ -2602,37 +1202,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `public class Solution {\n    public int reverseBits(int n) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    uint32_t reverseBits(uint32_t n) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:43261596,e:964176192},{n:4294967293,e:3221225471},
-  {n:0,e:0},{n:1,e:2147483648},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=reverseBits(c.n)>>>0;
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| n='+c.n+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'n':43261596,'e':964176192},{'n':4294967293,'e':3221225471},
-    {'n':0,'e':0},{'n':1,'e':2147483648},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.reverseBits(c['n'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| n='+str(c['n'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 68. Sum of Two Integers ───────────────────────────────────────────────────
@@ -2660,37 +1229,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int getSum(int a, int b) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int getSum(int a, int b) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {a:1,b:2,e:3},{a:2,b:3,e:5},{a:0,b:0,e:0},
-  {a:-1,b:1,e:0},{a:-5,b:3,e:-2},{a:100,b:200,e:300},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=getSum(c.a,c.b);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| a='+c.a+' b='+c.b+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'a':1,'b':2,'e':3},{'a':2,'b':3,'e':5},{'a':0,'b':0,'e':0},
-    {'a':-1,'b':1,'e':0},{'a':-5,'b':3,'e':-2},{'a':100,'b':200,'e':300},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.getSum(c['a'],c['b'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| a='+str(c['a'])+' b='+str(c['b'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 69. Generate Parentheses ──────────────────────────────────────────────────
@@ -2718,40 +1256,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<String> generateParenthesis(int n) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<string> generateParenthesis(int n) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {n:1,e:1},{n:2,e:2},{n:3,e:5},{n:4,e:14},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=generateParenthesis(c.n);
-    const valid=r.every(s=>{let b=0;for(const ch of s){b+=ch==='('?1:-1;if(b<0)return false;}return b===0;});
-    const ok=r.length===c.e&&valid;
-    console.log(ok?'✓ PASS':'✗ FAIL','| n='+c.n+'| Expected '+c.e+' valid strings | Got '+r.length);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[{'n':1,'e':1},{'n':2,'e':2},{'n':3,'e':5},{'n':4,'e':14}]
-def valid(s):
-    b=0
-    for c in s:
-        b+=1 if c=='(' else -1
-        if b<0:return False
-    return b==0
-p=0
-for c in cases:
-    try:
-        r=sol.generateParenthesis(c['n'])
-        ok=len(r)==c['e'] and all(valid(s) for s in r)
-        print('✓ PASS' if ok else '✗ FAIL','| n='+str(c['n'])+'| Expected',c['e'],'valid strings | Got',len(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 70. Daily Temperatures ────────────────────────────────────────────────────
@@ -2779,38 +1283,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int[] dailyTemperatures(int[] temperatures) {\n        return new int[0];\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<int> dailyTemperatures(vector<int>& temperatures) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {t:[73,74,75,71,69,72,76,73],e:[1,1,4,2,1,1,0,0]},
-  {t:[30,40,50,60],e:[1,1,1,0]},{t:[30,60,90],e:[1,1,0]},
-  {t:[89,62,70,58,47,47,46,76,100,70],e:[8,1,5,4,3,2,1,1,0,0]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=dailyTemperatures([...c.t]);
-    const ok=JSON.stringify(r)===JSON.stringify(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'t':[73,74,75,71,69,72,76,73],'e':[1,1,4,2,1,1,0,0]},
-    {'t':[30,40,50,60],'e':[1,1,1,0]},{'t':[30,60,90],'e':[1,1,0]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.dailyTemperatures(c['t'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 71. Evaluate Reverse Polish Notation ──────────────────────────────────────
@@ -2838,41 +1310,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int evalRPN(String[] tokens) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int evalRPN(vector<string>& tokens) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const cases=[
-  {t:['2','1','+','3','*'],e:9},
-  {t:['4','13','5','/','+'],e:6},
-  {t:['10','6','9','3','+','-11','*','/','*','17','+','5','+'],e:22},
-  {t:['3','-4','+'],e:-1},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=evalRPN([...c.t]);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-cases=[
-    {'t':['2','1','+','3','*'],'e':9},
-    {'t':['4','13','5','/','+'],'e':6},
-    {'t':['10','6','9','3','+','-11','*','/','*','17','+','5','+'],'e':22},
-    {'t':['3','-4','+'],'e':-1},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.evalRPN(c['t'][:])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 72. Permutations ──────────────────────────────────────────────────────────
@@ -2900,36 +1337,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<java.util.List<Integer>> permute(int[] nums) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-function fact(n){return n<=1?1:n*fact(n-1);}
-const cases=[
-  {n:[1,2,3],size:6},{n:[0,1],size:2},{n:[1],size:1},{n:[1,2,3,4],size:24},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=permute([...c.n]);
-    const sorted=JSON.stringify([...c.n].sort((a,b)=>a-b));
-    const ok=r.length===c.size&&r.every(a=>JSON.stringify([...a].sort((x,y)=>x-y))===sorted);
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected '+c.size+' perms | Got '+r.length);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-import math
-cases=[{'n':[1,2,3],'size':6},{'n':[0,1],'size':2},{'n':[1],'size':1},{'n':[1,2,3,4],'size':24}]
-p=0
-for c in cases:
-    try:
-        r=sol.permute(c['n'][:])
-        ok=len(r)==c['size'] and all(sorted(a)==sorted(c['n']) for a in r)
-        print('✓ PASS' if ok else '✗ FAIL','| Expected',c['size'],'perms | Got',len(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 73. Combination Sum II ────────────────────────────────────────────────────
@@ -2957,41 +1364,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public java.util.List<java.util.List<Integer>> combinationSum2(int[] candidates, int target) {\n        return new java.util.ArrayList<>();\n    }\n}`,
       cpp: `class Solution {\npublic:\n    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {\n        return {};\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const norm=arr=>(arr||[]).map(a=>[...a].sort((x,y)=>x-y)).sort((a,b)=>a.join()>b.join()?1:-1).map(a=>a.join()).join('|');
-const cases=[
-  {c:[10,1,2,7,6,1,5],t:8,e:[[1,1,6],[1,2,5],[1,7],[2,6]]},
-  {c:[2,5,2,1,2],t:5,e:[[1,2,2],[5]]},
-  {c:[2],t:1,e:[]},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=combinationSum2([...c.c],c.t);
-    const ok=norm(r)===norm(c.e);
-    console.log(ok?'✓ PASS':'✗ FAIL','| target='+c.t+'| Expected:'+JSON.stringify(c.e)+'| Got:'+JSON.stringify(r));
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-def norm(arr): return '|'.join(sorted([','.join(map(str,sorted(a))) for a in (arr or [])]))
-cases=[
-    {'c':[10,1,2,7,6,1,5],'t':8,'e':[[1,1,6],[1,2,5],[1,7],[2,6]]},
-    {'c':[2,5,2,1,2],'t':5,'e':[[1,2,2],[5]]},
-    {'c':[2],'t':1,'e':[]},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.combinationSum2(c['c'][:],c['t'])
-        ok=norm(r)==norm(c['e'])
-        print('✓ PASS' if ok else '✗ FAIL','| target='+str(c['t'])+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 74. Word Search ───────────────────────────────────────────────────────────
@@ -3020,40 +1392,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public boolean exist(char[][] board, String word) {\n        return false;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    bool exist(vector<vector<char>>& board, string word) {\n        return false;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-const B=[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]];
-const cases=[
-  {b:B,w:'ABCCED',e:true},{b:B,w:'SEE',e:true},
-  {b:B,w:'ABCB',e:false},{b:[["a"]],w:'a',e:true},
-  {b:[["a","b"],["c","d"]],w:'abdc',e:true},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=exist(c.b.map(r=>[...r]),c.w);
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| word='+c.w+'| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-sol=Solution()
-B=[["A","B","C","E"],["S","F","C","S"],["A","D","E","E"]]
-cases=[
-    {'b':B,'w':'ABCCED','e':True},{'b':B,'w':'SEE','e':True},
-    {'b':B,'w':'ABCB','e':False},{'b':[["a"]],'w':'a','e':True},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.exist([row[:] for row in c['b']],c['w'])
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| word='+c['w']+'| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
   // ── 75. Binary Tree Maximum Path Sum ─────────────────────────────────────────
@@ -3081,40 +1419,6 @@ print(f'\\n{p}/{len(cases)} test cases passed.')`,
       java: `class Solution {\n    public int maxPathSum(TreeNode root) {\n        return 0;\n    }\n}`,
       cpp: `class Solution {\npublic:\n    int maxPathSum(TreeNode* root) {\n        return 0;\n    }\n};`,
     },
-    jsRunner: jsIIFE(`
-${JS_TREE}
-const cases=[
-  {t:[1,2,3],e:6},{t:[-10,9,20,null,null,15,7],e:42},
-  {t:[-3],e:-3},{t:[1,-2,3],e:4},{t:[5,4,8,11,null,13,4,7,2,null,null,null,1],e:48},
-];
-let p=0;
-for(const c of cases){
-  try{
-    const r=maxPathSum(buildTree([...c.t]));
-    const ok=r===c.e;
-    console.log(ok?'✓ PASS':'✗ FAIL','| Expected:'+c.e+'| Got:'+r);
-    if(ok)p++;
-  }catch(e){console.log('✗ ERROR |',e.message);}
-}
-console.log('\\n'+p+'/'+cases.length+' test cases passed.');`),
-    pyRunner: `
-${PY_TREE}
-sol=Solution()
-cases=[
-    {'t':[1,2,3],'e':6},{'t':[-10,9,20,None,None,15,7],'e':42},
-    {'t':[-3],'e':-3},{'t':[1,-2,3],'e':4},
-    {'t':[5,4,8,11,None,13,4,7,2,None,None,None,1],'e':48},
-]
-p=0
-for c in cases:
-    try:
-        r=sol.maxPathSum(build_tree(c['t']))
-        ok=r==c['e']
-        print('✓ PASS' if ok else '✗ FAIL','| Expected:'+str(c['e'])+'| Got:'+str(r))
-        if ok: p+=1
-    except Exception as ex:
-        print('✗ ERROR |',str(ex))
-print(f'\\n{p}/{len(cases)} test cases passed.')`,
   },
 
 ];
@@ -3167,7 +1471,6 @@ async function main() {
         constraints: p.constraints as object,
         hints: p.hints as object,
         starterCode: p.starterCode as object,
-        jsRunner: p.jsRunner, pyRunner: p.pyRunner,
       },
       update: {
         title: p.title, slug: p.slug,
@@ -3177,7 +1480,6 @@ async function main() {
         constraints: p.constraints as object,
         hints: p.hints as object,
         starterCode: p.starterCode as object,
-        jsRunner: p.jsRunner, pyRunner: p.pyRunner,
       },
     });
     console.log(`  ✓ ${String(p.id).padStart(2, "0")}. ${p.title}`);

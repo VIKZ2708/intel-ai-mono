@@ -54,6 +54,7 @@ export default async function ProblemPage({
     starterCode: raw.starterCode as unknown as Problem["starterCode"],
     jsRunner:    raw.jsRunner,
     pyRunner:    raw.pyRunner,
+    javaRunner:  raw.javaRunner,
   };
 
   return (

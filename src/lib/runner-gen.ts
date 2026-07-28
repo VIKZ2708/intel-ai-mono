@@ -109,7 +109,7 @@ function genJS(meta: FunctionMeta, cases: TestCase[]): string {
 
   const total = cases.length;
 
-  const caseBlocks = cases.map(c => {
+  const caseBlocks = cases.map((c, i) => {
     const label = makeLabel(meta.params, c.input);
 
     const args = meta.params.map(p => {
@@ -183,17 +183,15 @@ function genJS(meta: FunctionMeta, cases: TestCase[]): string {
       const ipParam = meta.params.find(p => p.name === ip)!;
       const ipType = ipParam.type;
       const ipCopy = ipType === "int[][]" ? `c.input[${JSON.stringify(ip)}].map(r=>[...r])` : `[...c.input[${JSON.stringify(ip)}]]`;
-      return `  try{${callPre}const _ip=${ipCopy};${meta.name}(_ip${meta.params.filter(p=>p.name!==ip).map(p=>`,c.input[${JSON.stringify(p.name)}]`).join("")});const ok=${comparison};console.log(ok?'✓ PASS':'✗ FAIL','| ${label} | Expected:'+JSON.stringify(c.expected)+' | Got:'+${gotStr});if(ok)p++;}catch(e){console.log('✗ ERROR |',e.message);}`;
+      return `try{const c=_cases[${i}];${callPre}const _ip=${ipCopy};${meta.name}(_ip${meta.params.filter(p=>p.name!==ip).map(p=>`,c.input[${JSON.stringify(p.name)}]`).join("")});const ok=${comparison};console.log(ok?'✓ PASS':'✗ FAIL','| ${label} | Expected:'+JSON.stringify(c.expected)+' | Got:'+${gotStr});if(ok)p++;}catch(e){console.log('✗ ERROR |',e.message);}`;
     }
 
-    return `  try{${callPre}const r=${callExpr};const ok=${comparison};console.log(ok?'✓ PASS':'✗ FAIL','| ${label} | Expected:'+JSON.stringify(${expStr})+' | Got:'+${gotStr});if(ok)p++;}catch(e){console.log('✗ ERROR |',e.message);}`;
+    return `try{const c=_cases[${i}];${callPre}const r=${callExpr};const ok=${comparison};console.log(ok?'✓ PASS':'✗ FAIL','| ${label} | Expected:'+JSON.stringify(${expStr})+' | Got:'+${gotStr});if(ok)p++;}catch(e){console.log('✗ ERROR |',e.message);}`;
   }).join("\n");
 
   return `\n;(function(){\ntry{\n${prefix}const _cases=${JSON.stringify(cases)};
 let p=0;
-for(const c of _cases){
 ${caseBlocks}
-}
 console.log('\\n'+p+'/${total} test cases passed.');
 }catch(e){console.log('Runtime Error:',e.message)}
 })();`;
@@ -215,7 +213,7 @@ function genPY(meta: FunctionMeta, cases: TestCase[]): string {
 
   const total = cases.length;
 
-  const caseBlocks = cases.map(c => {
+  const caseBlocks = cases.map((c, i) => {
     const label = makeLabel(meta.params, c.input);
 
     const args = meta.params.map(p => {
@@ -288,15 +286,14 @@ function genPY(meta: FunctionMeta, cases: TestCase[]): string {
         ? `[list(r) for r in c['input'][${JSON.stringify(ip)}]]`
         : `list(c['input'][${JSON.stringify(ip)}])`;
       const otherArgs = meta.params.filter(p => p.name !== ip).map(p => `c['input'][${JSON.stringify(p.name)}]`).join(",");
-      return `    try:\n${callPre}        _ip=${ipCopy}\n        sol.${meta.name}(_ip${otherArgs ? "," + otherArgs : ""})\n        ok=${comparison}\n        print('✓ PASS' if ok else '✗ FAIL','| ${label} | Expected:'+str(c['expected'])+'| Got:'+${gotPrint})\n        if ok:p+=1\n    except Exception as ex:\n        print('✗ ERROR |',str(ex))`;
+      return `c=_cases[${i}]\ntry:\n${callPre}    _ip=${ipCopy}\n    sol.${meta.name}(_ip${otherArgs ? "," + otherArgs : ""})\n    ok=${comparison}\n    print('✓ PASS' if ok else '✗ FAIL','| ${label} | Expected:'+str(c['expected'])+'| Got:'+${gotPrint})\n    if ok:p+=1\nexcept Exception as ex:\n    print('✗ ERROR |',str(ex))`;
     }
 
-    return `    try:\n${callPre}        r=${callExpr}\n        ok=${comparison}\n        print('✓ PASS' if ok else '✗ FAIL','| ${label} | Expected:'+str(c['expected'])+'| Got:'+${gotPrint})\n        if ok:p+=1\n    except Exception as ex:\n        print('✗ ERROR |',str(ex))`;
+    return `c=_cases[${i}]\ntry:\n${callPre}    r=${callExpr}\n    ok=${comparison}\n    print('✓ PASS' if ok else '✗ FAIL','| ${label} | Expected:'+str(c['expected'])+'| Got:'+${gotPrint})\n    if ok:p+=1\nexcept Exception as ex:\n    print('✗ ERROR |',str(ex))`;
   }).join("\n");
 
   return `${prefix}_cases=${JSON.stringify(cases)}
 p=0
-for c in _cases:
 ${caseBlocks}
 print(f'\\n{p}/${total} test cases passed.')`;
 }

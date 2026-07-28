@@ -147,8 +147,12 @@ export default function IDEClient({
   const editorialSols  = solutions.filter((s) => s.solutionType === "editorial");
   const communitySols  = solutions.filter((s) => s.solutionType === "community");
 
-  const [lang, setLang]             = useState("javascript");
-  const [code, setCode]             = useState(problem.starterCode.javascript ?? "");
+  const savedLang = typeof window !== "undefined" ? (localStorage.getItem(`intel-ai-lang-${problem.id}`) ?? "javascript") : "javascript";
+  const [lang, setLang]             = useState(savedLang);
+  const [code, setCode]             = useState(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem(`intel-ai-code-${problem.id}-${savedLang}`) : null;
+    return saved ?? problem.starterCode[savedLang] ?? problem.starterCode.javascript ?? "";
+  });
   const [consoleTab, setConsoleTab] = useState<ConsoleTab>("testcase");
   const [leftTab, setLeftTab]       = useState<LeftTab>("description");
   const [lines, setLines]           = useState<TestLine[]>([]);
@@ -227,6 +231,7 @@ export default function IDEClient({
   }, [code, problem.id, lang]);
 
   const handleLangChange = useCallback((newLang: string) => {
+    localStorage.setItem(`intel-ai-lang-${problem.id}`, newLang);
     setLang(newLang);
     const saved = localStorage.getItem(`intel-ai-code-${problem.id}-${newLang}`);
     setCode(saved ?? problem.starterCode[newLang] ?? "");
@@ -252,11 +257,12 @@ export default function IDEClient({
     setSubmitResult(null);
     setLines([{ status: "info", text: isSubmit ? "⏳ Submitting your solution..." : "⏳ Running your code..." }]);
 
-    const langDef   = LANGUAGES.find((l) => l.id === lang)!;
-    const isJS      = lang === "javascript";
-    const isPY      = lang === "python";
-    const isJava    = lang === "java";
-    const hasRunner = isJS || isPY;
+    const langDef    = LANGUAGES.find((l) => l.id === lang)!;
+    const isJS       = lang === "javascript";
+    const isPY       = lang === "python";
+    const isJava     = lang === "java";
+    const javaRunner = (problem.javaRunner ?? "").trim();
+    const hasRunner  = isJS || isPY || (isJava && javaRunner.length > 0);
 
     let fullCode = code;
     if (isJS) fullCode = code + "\n" + problem.jsRunner;
@@ -270,13 +276,18 @@ export default function IDEClient({
       const JAVA_TREE_NODE =
         "class TreeNode {\n  int val;\n  TreeNode left, right;\n  TreeNode() {}\n  TreeNode(int val) { this.val = val; }\n  TreeNode(int val, TreeNode left, TreeNode right) { this.val = val; this.left = left; this.right = right; }\n}\n\n";
       let header = "import java.util.*;\nimport java.util.stream.*;\nimport java.io.*;\n\n";
-      if (code.includes("ListNode") && !code.includes("class ListNode")) header += JAVA_LIST_NODE;
-      if (code.includes("TreeNode") && !code.includes("class TreeNode")) header += JAVA_TREE_NODE;
-      // Strip any leading import lines from user code to avoid duplicates
+      const needsListNode = (code.includes("ListNode") || javaRunner.includes("ListNode")) && !code.includes("class ListNode");
+      const needsTreeNode = (code.includes("TreeNode") || javaRunner.includes("TreeNode")) && !code.includes("class TreeNode");
+      if (needsListNode) header += JAVA_LIST_NODE;
+      if (needsTreeNode) header += JAVA_TREE_NODE;
       const userBody = code.trimStart().replace(/^(import\s+[\w.*]+;\s*\r?\n)*/g, "");
-      fullCode = header + userBody;
-      if (!fullCode.includes("class Main")) {
-        fullCode += "\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"✔ COMPILE_OK\");\n  }\n}";
+      if (javaRunner.length > 0) {
+        fullCode = header + userBody + "\n" + javaRunner;
+      } else {
+        fullCode = header + userBody;
+        if (!fullCode.includes("class Main")) {
+          fullCode += "\npublic class Main {\n  public static void main(String[] args) {\n    System.out.println(\"✔ COMPILE_OK\");\n  }\n}";
+        }
       }
     }
     if (lang === "cpp") {
@@ -815,7 +826,7 @@ export default function IDEClient({
               {LANGUAGES.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
             </select>
             <div className="flex items-center gap-2">
-              {(lang === "java" || lang === "cpp") && <span className="text-xs text-yellow-400/70">Scoring: JS &amp; Python only</span>}
+              {lang === "cpp" && <span className="text-xs text-yellow-400/70">Scoring: JS, Python &amp; Java only</span>}
               <button onClick={handleReset} title="Reset" className="p-1.5 rounded-md text-[#8b949e] hover:text-white hover:bg-white/5"><RotateCcw className="w-3.5 h-3.5" /></button>
             </div>
           </div>

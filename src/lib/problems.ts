@@ -36,6 +36,7 @@ export interface Problem {
   starterCode: Record<string, string>;
   jsRunner: string;
   pyRunner: string;
+  javaRunner?: string;
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────────

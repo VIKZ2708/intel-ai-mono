@@ -73,26 +73,11 @@ interface TestLine { status: "pass" | "fail" | "error" | "info" | "score" | "com
 interface SubmitResult {
   status: "accepted" | "wrong" | "error" | "submitted";
   passed: number; total: number;
-  runtime: number; memory: number;
-  runtimeBeat: number; memoryBeat: number;
+  runtime: number | null; memory: number | null;
   lines: TestLine[];
   submittedCode: string; submittedLang: string;
 }
 
-interface HistoBar { ms: number; height: number; isUser: boolean; }
-
-function generateHistogramBars(userRuntime: number): HistoBar[] {
-  const count = 30;
-  const maxMs  = 100;
-  const userBarIdx = Math.max(0, Math.round((userRuntime / maxMs) * count) - 2);
-  const peakIdx    = Math.min(count - 1, userBarIdx + Math.floor(Math.random() * 5 + 4));
-  return Array.from({ length: count }, (_, i) => {
-    const dist = i - peakIdx;
-    const base = Math.exp(-0.07 * dist * dist) * 88;
-    const noise = (Math.random() - 0.5) * 9;
-    return { ms: Math.round((i / count) * maxMs + 1), height: Math.max(3, Math.min(100, base + noise)), isUser: i === userBarIdx };
-  });
-}
 
 function parseLines(raw: string): TestLine[] {
   return raw.split("\n").filter(Boolean).map((line) => {
@@ -120,14 +105,6 @@ function parseTestLine(text: string) {
   return { input: inputPart, expected: expectedPart, got: gotPart };
 }
 
-function fakeMetrics() {
-  return {
-    runtime:     Math.floor(Math.random() * 80 + 55),
-    memory:      parseFloat((Math.random() * 5 + 40).toFixed(1)),
-    runtimeBeat: Math.floor(Math.random() * 22 + 68),
-    memoryBeat:  Math.floor(Math.random() * 28 + 46),
-  };
-}
 
 interface NavItem { id: number; title: string; }
 
@@ -167,10 +144,6 @@ export default function IDEClient({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
 
-  const histoBars = useMemo<HistoBar[]>(() => {
-    if (!submitResult || submitResult.status !== "accepted") return [];
-    return generateHistogramBars(submitResult.runtime);
-  }, [submitResult]);
 
   // ── Resizable panels ──────────────────────────────────────────────────────
   const [leftPct, setLeftPct]       = useState(40);
@@ -321,6 +294,9 @@ export default function IDEClient({
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
+      const runtime = data.time   ? Math.round(parseFloat(data.time) * 1000) : null;
+      const memory  = data.memory ? Math.round(data.memory / 1024 * 10) / 10 : null;
+
       const combined = [data.compile_output, data.stdout, data.stderr].filter(Boolean).join("\n").trim();
       const parsed   = combined ? parseLines(combined) : [{ status: "info" as const, text: "(no output — check your code)" }];
       setLines(parsed);
@@ -330,21 +306,20 @@ export default function IDEClient({
         if (total > 0 && passed === total) {
           setRunStatus("passed");
           if (isSubmit) {
-            const metrics = fakeMetrics();
-            setSubmitResult({ status: "accepted", passed, total, lines: parsed, submittedCode: code, submittedLang: lang, ...metrics });
+            setSubmitResult({ status: "accepted", passed, total, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("accepted");
             if (session?.user) {
               fetch("/api/submissions", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "accepted", runtime: metrics.runtime, memory: metrics.memory }),
+                body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "accepted", runtime, memory }),
               }).then(() => fetchHistory()).catch(() => {});
             }
           }
         } else if (total > 0) {
           setRunStatus("failed");
           if (isSubmit) {
-            setSubmitResult({ status: "wrong", passed, total, lines: parsed, submittedCode: code, submittedLang: lang, ...fakeMetrics() });
+            setSubmitResult({ status: "wrong", passed, total, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("wrong");
             if (session?.user) {
               fetch("/api/submissions", {
@@ -357,7 +332,7 @@ export default function IDEClient({
         } else {
           setRunStatus("error");
           if (isSubmit) {
-            setSubmitResult({ status: "error", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, ...fakeMetrics() });
+            setSubmitResult({ status: "error", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("wrong");
           }
         }
@@ -369,11 +344,11 @@ export default function IDEClient({
           setLines(parsed);
           if (hasErr) {
             setRunStatus("error");
-            setSubmitResult({ status: "error", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, ...fakeMetrics() });
+            setSubmitResult({ status: "error", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("wrong");
           } else {
             setRunStatus("idle");
-            setSubmitResult({ status: "submitted", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, ...fakeMetrics() });
+            setSubmitResult({ status: "submitted", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("accepted");
             if (session?.user) {
               fetch("/api/submissions", {
@@ -562,40 +537,15 @@ export default function IDEClient({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-[#0d1117] border border-[#21262d] rounded-xl p-4">
                     <div className="flex items-center gap-1.5 text-xs text-[#8b949e] mb-2"><Clock className="w-3 h-3" /> Runtime</div>
-                    <div className="text-2xl font-bold text-white">{submitResult.runtime}<span className="text-sm font-normal text-[#8b949e] ml-1">ms</span></div>
-                    <div className="text-xs text-green-400 font-semibold mt-0.5">Beats {submitResult.runtimeBeat}%</div>
+                    {submitResult.runtime != null
+                      ? <div className="text-2xl font-bold text-white">{submitResult.runtime}<span className="text-sm font-normal text-[#8b949e] ml-1">ms</span></div>
+                      : <div className="text-2xl font-bold text-[#8b949e]">N/A</div>}
                   </div>
                   <div className="bg-[#0d1117] border border-[#21262d] rounded-xl p-4">
                     <div className="flex items-center gap-1.5 text-xs text-[#8b949e] mb-2"><MemoryStick className="w-3 h-3" /> Memory</div>
-                    <div className="text-2xl font-bold text-white">{submitResult.memory}<span className="text-sm font-normal text-[#8b949e] ml-1">MB</span></div>
-                    <div className="text-xs text-green-400 font-semibold mt-0.5">Beats {submitResult.memoryBeat}%</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-[#8b949e] uppercase tracking-wider mb-3">Runtime Distribution</div>
-                  <div className="bg-[#0d1117] border border-[#21262d] rounded-xl p-4">
-                    <div className="flex items-end gap-px" style={{ height: 80 }}>
-                      {histoBars.map((bar, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ height: 0 }}
-                          animate={{ height: `${bar.height}%` }}
-                          transition={{ delay: i * 0.012, duration: 0.35, ease: "easeOut" }}
-                          style={{ flex: 1 }}
-                          className={`rounded-sm transition-colors ${bar.isUser ? "bg-[#0071e3] shadow-lg shadow-[#0071e3]/30" : "bg-[#21262d] hover:bg-[#30363d]"}`}
-                          title={`${bar.ms}ms`}
-                        />
-                      ))}
-                    </div>
-                    <div className="flex justify-between mt-2 text-[10px] text-[#8b949e]">
-                      <span>1ms</span>
-                      <span className="text-[#0071e3] font-semibold">{submitResult.runtime}ms ← you</span>
-                      <span>100ms</span>
-                    </div>
-                    <div className="mt-3 flex items-center gap-4 text-[10px] text-[#8b949e]">
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-2 bg-[#0071e3] rounded-sm inline-block" /> Your submission</span>
-                      <span className="flex items-center gap-1.5"><span className="w-3 h-2 bg-[#21262d] rounded-sm inline-block" /> All submissions</span>
-                    </div>
+                    {submitResult.memory != null
+                      ? <div className="text-2xl font-bold text-white">{submitResult.memory}<span className="text-sm font-normal text-[#8b949e] ml-1">MB</span></div>
+                      : <div className="text-2xl font-bold text-[#8b949e]">N/A</div>}
                   </div>
                 </div>
                 <div>

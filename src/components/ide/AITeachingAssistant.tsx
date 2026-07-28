@@ -11,11 +11,13 @@ function getIDEResponse(input: string, problem: Problem, code: string, hintIdx: 
 
   // Hint requests — check specific variants BEFORE the generic "hint" check
   if (q.includes("hint") || q.includes("help") || q.includes("stuck")) {
+    if (hintIdx >= problem.hints.length) {
+      return `You've already seen all ${problem.hints.length} hints for **${problem.title}**! Give the problem a shot — you have everything you need.`;
+    }
     onHint();
-    const idx = Math.min(hintIdx, problem.hints.length - 1);
-    const hint = problem.hints[idx];
+    const hint = problem.hints[hintIdx];
     const hasMore = hintIdx + 1 < problem.hints.length;
-    return `Here's hint ${idx + 1} for **${problem.title}**:\n\n${hint}${hasMore ? "\n\nWant another hint? Just ask!" : "\n\nThat's all the hints — give it a try!"}`;
+    return `**Hint ${hintIdx + 1}/${problem.hints.length}** — **${problem.title}**:\n\n${hint}${hasMore ? "\n\nWant another hint? Just ask!" : "\n\nThat's all the hints — give it a try!"}`;
   }
 
   if (q.includes("approach") || q.includes("how to solve") || q.includes("algorithm")) {
@@ -97,7 +99,7 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
       const reply: Message = {
         id: Date.now() + 1,
         role: "assistant",
-        text: getIDEResponse(msg, problem, code, currentHintIndex, () => setHintIndex(i => Math.min(i + 1, problem.hints.length - 1))),
+        text: getIDEResponse(msg, problem, code, currentHintIndex, () => setHintIndex(i => Math.min(i + 1, problem.hints.length))),
       };
       setMessages((prev) => [...prev, reply]);
     }, 500);

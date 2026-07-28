@@ -145,10 +145,10 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl p-6 flex flex-col justify-between">
             <div className="text-sm font-semibold text-[#8b949e] uppercase tracking-wider mb-3">Progress</div>
             <div className="flex items-center gap-3 mb-4">
-              <ProgressRing value={stats?.totalSolved ?? 0} max={10} size={72} stroke={6} />
+              <ProgressRing value={stats?.totalSolved ?? 0} max={stats?.totalProblems ?? 1} size={72} stroke={6} />
               <div>
                 <div className="text-2xl font-bold text-white">{pct}%</div>
-                <div className="text-xs text-[#8b949e]">{stats?.totalSolved ?? 0} / 10 problems</div>
+                <div className="text-xs text-[#8b949e]">{stats?.totalSolved ?? 0} / {stats?.totalProblems ?? 0} problems</div>
               </div>
             </div>
             <div className="space-y-2">
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                 <div key={d} className="flex items-center gap-2">
                   <span className="text-xs text-[#8b949e] w-14">{d}</span>
                   <div className="flex-1 h-1.5 bg-[#21262d] rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${stats ? (stats.breakdown[d] / 10) * 100 : 0}%` }} transition={{ duration: 0.8, delay: 0.3 }} className={`h-full rounded-full ${bg}`} />
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${stats ? (stats.breakdown[d] / (stats.totalProblems || 1)) * 100 : 0}%` }} transition={{ duration: 0.8, delay: 0.3 }} className={`h-full rounded-full ${bg}`} />
                   </div>
                   <span className="text-xs text-white font-semibold w-4 text-right">{stats?.breakdown[d] ?? 0}</span>
                 </div>

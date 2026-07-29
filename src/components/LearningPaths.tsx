@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { learningPaths } from "@/lib/data";
 import { ArrowRight, BookOpen, Clock } from "lucide-react";
@@ -45,30 +46,34 @@ export default function LearningPaths() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group relative flex flex-col bg-[#0d1117] border border-[#21262d] rounded-2xl p-6 hover:border-[#0071e3]/50 transition-all duration-300 card-glow cursor-pointer"
             >
-              {/* Gradient top bar */}
-              <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-gradient-to-r ${path.color}`} />
+              <Link
+                href="/study-plan"
+                className="group relative flex flex-col bg-[#0d1117] border border-[#21262d] rounded-2xl p-6 hover:border-[#0071e3]/50 transition-all duration-300 card-glow hover:-translate-y-1 block"
+              >
+                {/* Gradient top bar */}
+                <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-gradient-to-r ${path.color}`} />
 
-              <div className="text-4xl mb-4">{path.icon}</div>
+                <div className="text-4xl mb-4">{path.icon}</div>
 
-              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#3d95f4] transition-colors">
-                {path.title}
-              </h3>
-              <p className="text-sm text-[#8b949e] mb-6 leading-relaxed flex-1">{path.description}</p>
+                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#3d95f4] transition-colors">
+                  {path.title}
+                </h3>
+                <p className="text-sm text-[#8b949e] mb-6 leading-relaxed flex-1">{path.description}</p>
 
-              <div className="flex items-center justify-between text-xs text-[#8b949e] mb-4">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> {path.weeks} weeks
+                <div className="flex items-center justify-between text-xs text-[#8b949e] mb-4">
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5" /> {path.weeks} weeks
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="w-3.5 h-3.5" /> {path.courses} courses
+                  </span>
+                </div>
+
+                <span className="flex items-center gap-1 text-sm font-semibold text-[#0071e3] group-hover:text-[#00c9ff] transition-colors">
+                  Explore Path <ArrowRight className="w-4 h-4" />
                 </span>
-                <span className="flex items-center gap-1">
-                  <BookOpen className="w-3.5 h-3.5" /> {path.courses} courses
-                </span>
-              </div>
-
-              <button className="flex items-center gap-1 text-sm font-semibold text-[#0071e3] hover:text-[#00c9ff] transition-colors">
-                Explore Path <ArrowRight className="w-4 h-4" />
-              </button>
+              </Link>
             </motion.div>
           ))}
         </div>

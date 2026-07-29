@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { learningPaths } from "@/lib/data";
 import { ArrowRight, BookOpen, Clock } from "lucide-react";
+import TiltCard from "./TiltCard";
 
 export default function LearningPaths() {
   return (
@@ -47,9 +48,10 @@ export default function LearningPaths() {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
             >
+              <TiltCard intensity={10}>
               <Link
                 href="/study-plan"
-                className="group relative flex flex-col bg-[#0d1117] border border-[#21262d] rounded-2xl p-6 hover:border-[#0071e3]/50 transition-all duration-300 card-glow hover:-translate-y-1 block"
+                className="group relative flex flex-col bg-[#0d1117] border border-[#21262d] rounded-2xl p-6 hover:border-[#0071e3]/50 transition-all duration-300 card-glow block"
               >
                 {/* Gradient top bar */}
                 <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-gradient-to-r ${path.color}`} />
@@ -74,6 +76,7 @@ export default function LearningPaths() {
                   Explore Path <ArrowRight className="w-4 h-4" />
                 </span>
               </Link>
+              </TiltCard>
             </motion.div>
           ))}
         </div>

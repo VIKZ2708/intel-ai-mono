@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ExternalLink, Globe } from "lucide-react";
 import Image from "next/image";
+import TiltCard from "./TiltCard";
 
 const founders = [
   {
@@ -65,7 +66,9 @@ export default function FoundersSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.15 }}
-              className="group bg-[#161b22] border border-[#21262d] rounded-2xl p-8 hover:border-[#0071e3]/40 transition-all duration-300 card-glow"
+            >
+            <TiltCard intensity={7}>
+            <div className="group bg-[#161b22] border border-[#21262d] rounded-2xl p-8 hover:border-[#0071e3]/40 transition-all duration-300 card-glow h-full"
             >
               {/* Avatar */}
               <div className="flex items-center gap-5 mb-6">
@@ -117,6 +120,8 @@ export default function FoundersSection() {
 
               {/* Decorative line */}
               <div className={`h-0.5 rounded-full bg-gradient-to-r ${founder.gradient} opacity-30`} />
+            </div>
+            </TiltCard>
             </motion.div>
           ))}
         </div>

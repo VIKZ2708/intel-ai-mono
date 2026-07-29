@@ -11,6 +11,7 @@ import FoundersSection from "@/components/FoundersSection";
 import Footer from "@/components/Footer";
 import LoginModal from "@/components/LoginModal";
 import AIChat from "@/components/AIChat";
+import MarqueeShowcase from "@/components/MarqueeShowcase";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
@@ -21,6 +22,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#0d1117] text-white">
       <Navbar onLoginClick={() => setLoginOpen(true)} />
       <Hero onLoginClick={() => setLoginOpen(true)} />
+      <MarqueeShowcase />
       <LearningPaths />
       <CoursesSection />
       <YearProgram />

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { courses, Course } from "@/lib/data";
 import CourseCard from "./CourseCard";
+import TiltCard from "./TiltCard";
 
 type Filter = "All" | Course["category"];
 
@@ -81,7 +82,9 @@ export default function CoursesSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <CourseCard course={course} />
+                <TiltCard intensity={8}>
+                  <CourseCard course={course} />
+                </TiltCard>
               </motion.div>
             ))}
           </motion.div>

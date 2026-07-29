@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signIn } from "next-auth/react";
 import { X, Mail, Lock, User, Eye, EyeOff, Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/apiClient";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -57,10 +58,9 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setError(""); setLoading(true);
 
     if (tab === "signup") {
-      const res = await fetch("/api/auth/register", {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ name, email, password }),
+      const res = await apiFetch("/auth/register", {
+        method: "POST",
+        body:   JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); setLoading(false); return; }

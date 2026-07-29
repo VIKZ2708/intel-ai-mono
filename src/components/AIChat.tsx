@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Bot, User, Lock } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/apiClient";
 
 const MSG_LIMIT = 10;
 const STORAGE_KEY = "intel_ai_msg_count";
@@ -278,7 +279,7 @@ export default function AIChat() {
   useEffect(() => {
     if (status === "loading") return;
     if (isLoggedIn) {
-      fetch("/api/ai").then(r => r.json()).then(d => setMsgCount(d.count ?? 0)).catch(() => {});
+      apiFetch("/ai").then(r => r.json()).then(d => setMsgCount(d.count ?? 0)).catch(() => {});
     } else {
       setMsgCount(parseInt(localStorage.getItem(STORAGE_KEY) ?? "0", 10));
     }
@@ -300,7 +301,7 @@ export default function AIChat() {
 
     // Persist count
     if (isLoggedIn) {
-      fetch("/api/ai", { method: "POST" }).catch(() => {});
+      apiFetch("/ai", { method: "POST" }).catch(() => {});
     } else {
       localStorage.setItem(STORAGE_KEY, String(newCount));
     }

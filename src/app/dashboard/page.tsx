@@ -10,6 +10,7 @@ import {
   Zap, CheckCircle2, XCircle, Code2, Trophy,
   Calendar, TrendingUp, Target, ArrowRight, Loader2,
 } from "lucide-react";
+import { apiFetch } from "@/lib/apiClient";
 
 interface Stats {
   user:             { name: string; email: string; image: string | null; createdAt: string };
@@ -71,7 +72,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (status !== "authenticated") return;
     setLoading(true);
-    fetch("/api/user/stats", { cache: "no-store" })
+    apiFetch("/user/stats", { cache: "no-store" })
       .then((r) => r.json())
       .then((d) => { setStats(d); setLoading(false); })
       .catch(() => setLoading(false));

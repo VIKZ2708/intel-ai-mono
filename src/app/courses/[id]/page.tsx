@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import LoginModal from "@/components/LoginModal";
 import AIChat from "@/components/AIChat";
+import { apiFetch } from "@/lib/apiClient";
 
 const categoryColor: Record<string, string> = {
   DSA: "text-blue-400 bg-blue-400/10 border-blue-400/20",
@@ -71,9 +72,8 @@ export default function CoursePage({ params }: { params: Promise<{ id: string }>
     e.preventDefault();
     setEnrolling(true);
     try {
-      await fetch("/api/enrollment", {
+      await apiFetch("/enrollment", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: nameRef.current?.value,
           email: emailRef.current?.value,

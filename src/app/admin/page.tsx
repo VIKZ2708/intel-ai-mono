@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Users, Code2, BookOpen, Loader2, Zap, TrendingUp, Mail, Phone } from "lucide-react";
+import { apiFetch } from "@/lib/apiClient";
 
 interface AdminData {
   users: { id: string; name: string | null; email: string | null; messageCount: number; createdAt: string; _count: { submissions: number } }[];
@@ -37,9 +38,9 @@ export default function AdminPage() {
     if (status !== "authenticated" || session?.user?.email !== "vikz2708@gmail.com") return;
 
     Promise.all([
-      fetch("/api/admin/users").then(r => r.json()),
-      fetch("/api/enrollment").then(r => r.json()),
-      fetch("/api/admin/stats").then(r => r.json()),
+      apiFetch("/admin/users").then(r => r.json()),
+      apiFetch("/enrollment").then(r => r.json()),
+      apiFetch("/admin/stats").then(r => r.json()),
     ]).then(([users, enrollments, stats]) => {
       setData({ users: Array.isArray(users) ? users : [], enrollments: Array.isArray(enrollments) ? enrollments : [], totalSubmissions: stats?.totalSubmissions ?? 0 });
       setLoading(false);

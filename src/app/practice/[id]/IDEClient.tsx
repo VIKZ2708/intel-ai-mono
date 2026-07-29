@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { Problem } from "@/lib/problems";
 import { generateRunner } from "@/lib/runner-gen";
 import AITeachingAssistant from "@/components/ide/AITeachingAssistant";
+import { apiFetch } from "@/lib/apiClient";
 
 interface DBSolution {
   id: string;
@@ -182,7 +183,7 @@ export default function IDEClient({
     if (!session?.user) return;
     setHistoryLoading(true);
     try {
-      const res  = await fetch(`/api/submissions?problemId=${problem.id}`);
+      const res  = await apiFetch(`/submissions?problemId=${problem.id}`);
       const data = await res.json();
       setHistory(Array.isArray(data) ? data : []);
     } catch { setHistory([]); } finally { setHistoryLoading(false); }
@@ -286,9 +287,8 @@ export default function IDEClient({
     }
 
     try {
-      const res  = await fetch("/api/execute", {
+      const res  = await apiFetch("/execute", {
         method:  "POST",
-        headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ source_code: fullCode, language_id: langDef.judge0Id }),
       });
       const data = await res.json();
@@ -309,9 +309,8 @@ export default function IDEClient({
             setSubmitResult({ status: "accepted", passed, total, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("accepted");
             if (session?.user) {
-              fetch("/api/submissions", {
+              apiFetch("/submissions", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "accepted", runtime, memory }),
               }).then(() => fetchHistory()).catch(() => {});
             }
@@ -322,9 +321,8 @@ export default function IDEClient({
             setSubmitResult({ status: "wrong", passed, total, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("wrong");
             if (session?.user) {
-              fetch("/api/submissions", {
+              apiFetch("/submissions", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "wrong", runtime: null, memory: null }),
               }).then(() => fetchHistory()).catch(() => {});
             }
@@ -351,9 +349,8 @@ export default function IDEClient({
             setSubmitResult({ status: "submitted", passed: 0, total: 0, lines: parsed, submittedCode: code, submittedLang: lang, runtime, memory });
             setLeftTab("accepted");
             if (session?.user) {
-              fetch("/api/submissions", {
+              apiFetch("/submissions", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "no_runner", runtime: null, memory: null }),
               }).then(() => fetchHistory()).catch(() => {});
             }

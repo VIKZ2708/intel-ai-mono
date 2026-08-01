@@ -122,6 +122,7 @@ export default function DashboardPage() {
           <span className="font-bold text-white">Intel<span className="text-[#00c9ff]"> AI</span></span>
         </Link>
         <div className="flex items-center gap-3">
+          <Link href="/leaderboard" className="text-sm text-[#8b949e] hover:text-white transition-colors">Leaderboard</Link>
           <Link href="/practice" className="text-sm text-[#8b949e] hover:text-white transition-colors">Practice Arena</Link>
           <Link href="/" className="text-sm text-[#8b949e] hover:text-white transition-colors">Home</Link>
         </div>

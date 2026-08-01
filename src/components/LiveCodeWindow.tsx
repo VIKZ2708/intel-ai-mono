@@ -170,57 +170,48 @@ export default function LiveCodeWindow() {
           </div>
         </div>
 
-        {/* Test results */}
-        <AnimatePresence>
-          {phase !== "typing" && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="border-t border-[#21262d] overflow-hidden"
-            >
-              <div className="px-4 py-3 space-y-1.5">
-                <div className="text-[10px] text-[#8b949e] uppercase tracking-wider mb-2">Test Cases</div>
-                {TEST_CASES.slice(0, testIdx).map((tc, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center justify-between text-[11px]"
-                  >
-                    <span className="text-[#8b949e] font-mono truncate max-w-[200px]">{tc.input}</span>
-                    <span className={`font-mono font-semibold ${tc.pass ? "text-green-400" : "text-red-400"}`}>
-                      → {tc.output} {tc.pass ? "✓" : "✗"}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
+        {/* Test results — fixed height, opacity-only animation to prevent layout shift on mobile */}
+        <div className="border-t border-[#21262d] overflow-hidden" style={{ height: 164 }}>
+          <motion.div
+            animate={{ opacity: phase !== "typing" ? 1 : 0 }}
+            transition={{ duration: 0.3 }}
+            className="px-4 py-3 space-y-1.5"
+          >
+            <div className="text-[10px] text-[#8b949e] uppercase tracking-wider mb-2">Test Cases</div>
+            {TEST_CASES.map((tc, i) => (
+              <motion.div
+                key={i}
+                animate={{ opacity: i < testIdx ? 1 : 0, x: i < testIdx ? 0 : -10 }}
+                initial={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center justify-between text-[11px]"
+              >
+                <span className="text-[#8b949e] font-mono truncate max-w-[200px]">{tc.input}</span>
+                <span className={`font-mono font-semibold ${tc.pass ? "text-green-400" : "text-red-400"}`}>
+                  → {tc.output} {tc.pass ? "✓" : "✗"}
+                </span>
+              </motion.div>
+            ))}
+          </motion.div>
 
-              {/* Accepted banner */}
-              <AnimatePresence>
-                {phase === "done" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="mx-4 mb-3 px-3 py-2.5 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-400" />
-                      <span className="text-sm font-bold text-green-400">Accepted</span>
-                      <span className="text-[10px] text-[#8b949e]">3/3 test cases passed</span>
-                    </div>
-                    <div className="flex gap-3 text-[10px] text-[#8b949e]">
-                      <span>⚡ 52ms</span>
-                      <span>💾 17.2MB</span>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* Accepted banner — animates in without height change */}
+          <motion.div
+            animate={{ opacity: phase === "done" ? 1 : 0, y: phase === "done" ? 0 : 8 }}
+            initial={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.3 }}
+            className="mx-4 px-3 py-2.5 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-green-400" />
+              <span className="text-sm font-bold text-green-400">Accepted</span>
+              <span className="text-[10px] text-[#8b949e]">3/3 test cases passed</span>
+            </div>
+            <div className="flex gap-3 text-[10px] text-[#8b949e]">
+              <span>⚡ 52ms</span>
+              <span>💾 17.2MB</span>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
 
       {/* Floating badges */}

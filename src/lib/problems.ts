@@ -14,7 +14,8 @@ export type Category =
   | "Heap"
   | "Bit Manipulation"
   | "Math"
-  | "Intervals";
+  | "Intervals"
+  | "Design";
 
 export interface TestCase {
   input: string;

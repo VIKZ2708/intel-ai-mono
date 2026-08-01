@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Zap, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Zap, LogOut, LayoutDashboard, Trophy } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 
 interface NavbarProps {
@@ -16,6 +16,7 @@ const navLinks = [
   { label: "Learning Paths", href: "#paths" },
   { label: "Practice",       href: "/practice" },
   { label: "Study Plan",     href: "/study-plan" },
+  { label: "Leaderboard",    href: "/leaderboard" },
   { label: "Founders",       href: "#founders" },
 ];
 
@@ -128,6 +129,9 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
                       <Link href="/dashboard" onClick={() => setDropdown(false)} className="flex items-center gap-2.5 px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors">
                         <LayoutDashboard className="w-4 h-4 text-[#0071e3]" /> Dashboard
                       </Link>
+                      <Link href="/leaderboard" onClick={() => setDropdown(false)} className="flex items-center gap-2.5 px-4 py-3 text-sm text-white hover:bg-white/5 transition-colors">
+                        <Trophy className="w-4 h-4 text-yellow-400" /> Leaderboard
+                      </Link>
                       <button onClick={() => { signOut(); setDropdown(false); }} className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
                         <LogOut className="w-4 h-4" /> Sign Out
                       </button>
@@ -212,6 +216,9 @@ export default function Navbar({ onLoginClick }: NavbarProps) {
                   </div>
                   <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-white border border-[#30363d] rounded-xl hover:bg-white/5 transition-colors">
                     <LayoutDashboard className="w-4 h-4 text-[#0071e3]" /> Dashboard
+                  </Link>
+                  <Link href="/leaderboard" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-white border border-[#30363d] rounded-xl hover:bg-white/5 transition-colors">
+                    <Trophy className="w-4 h-4 text-yellow-400" /> Leaderboard
                   </Link>
                   <button onClick={() => { signOut(); setMobileOpen(false); }} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-red-400 border border-red-400/20 rounded-xl">
                     <LogOut className="w-4 h-4" /> Sign Out

@@ -14,7 +14,15 @@ export default async function ProblemPage({
   if (isNaN(problemId)) notFound();
 
   const [raw, prev, next, totalCount, solutions] = await Promise.all([
-    prisma.intelProblem.findUnique({ where: { id: problemId } }),
+    prisma.intelProblem.findUnique({
+      where: { id: problemId },
+      include: {
+        playlistItems: {
+          where: { playlist: { tag: "Company" } },
+          include: { playlist: { select: { name: true, slug: true, icon: true } } },
+        },
+      },
+    }),
     prisma.intelProblem.findFirst({
       where:   { id: { lt: problemId } },
       orderBy: { id: "desc" },
@@ -56,6 +64,8 @@ export default async function ProblemPage({
     functionMeta: (raw.functionMeta as unknown as Problem["functionMeta"]) ?? null,
   };
 
+  const companies = (raw?.playlistItems ?? []).map((item) => item.playlist);
+
   return (
     <IDEClient
       problem={problem}
@@ -63,6 +73,7 @@ export default async function ProblemPage({
       prev={prev}
       next={next}
       totalCount={totalCount}
+      companies={companies}
     />
   );
 }

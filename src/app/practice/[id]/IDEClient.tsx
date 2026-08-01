@@ -109,18 +109,28 @@ function parseTestLine(text: string) {
 
 interface NavItem { id: number; title: string; }
 
+const companyStyle: Record<string, string> = {
+  google:    "bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20",
+  amazon:    "bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/20",
+  microsoft: "bg-indigo-400/10 text-indigo-400 border-indigo-400/20 hover:bg-indigo-400/20",
+};
+
+interface CompanyTag { name: string; slug: string; icon: string; }
+
 export default function IDEClient({
   problem,
   solutions,
   prev,
   next,
   totalCount,
+  companies = [],
 }: {
   problem: Problem;
   solutions: DBSolution[];
   prev: NavItem | null;
   next: NavItem | null;
   totalCount: number;
+  companies?: CompanyTag[];
 }) {
   const { data: session } = useSession();
   const editorialSols  = solutions.filter((s) => s.solutionType === "editorial");
@@ -624,13 +634,27 @@ export default function IDEClient({
             {/* ── DESCRIPTION ── */}
             {leftTab === "description" && (
               <div className="p-5">
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${difficultyColor[problem.difficulty] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                     {problem.difficulty}
                   </span>
                   <span className="text-xs text-[#0071e3] font-medium">{problem.category}</span>
                   <span className="text-xs text-[#8b949e]">✓ {problem.acceptance}</span>
                 </div>
+                {companies.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                    {companies.map((co) => (
+                      <Link
+                        key={co.slug}
+                        href={`/study-plan/${co.slug}`}
+                        className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border transition-colors ${companyStyle[co.slug] ?? "bg-white/5 text-[#8b949e] border-white/10 hover:bg-white/10"}`}
+                      >
+                        <span>{co.icon}</span>
+                        {co.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
                 <h1 className="text-base font-bold text-white mb-4">{problem.id}. {problem.title}</h1>
                 <div className="text-sm text-[#c9d1d9] leading-relaxed mb-6 whitespace-pre-line">{problem.description}</div>
                 {problem.examples.map((ex, i) => (

@@ -8,9 +8,10 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   Zap, CheckCircle2, XCircle, Code2, Trophy,
-  Calendar, TrendingUp, Target, ArrowRight, Loader2,
+  Calendar, TrendingUp, Target, ArrowRight, Loader2, Flame, Star,
 } from "lucide-react";
 import { apiFetch } from "@/lib/apiClient";
+import ActivityCalendar from "@/components/ActivityCalendar";
 
 interface Stats {
   user:             { name: string; email: string; image: string | null; createdAt: string };
@@ -20,6 +21,11 @@ interface Stats {
   languages:        Record<string, number>;
   totalSubmissions: number;
   acceptanceRate:   number;
+  xp:              number;
+  currentStreak:   number;
+  maxStreak:       number;
+  activityCalendar: { date: string; count: number }[];
+  totalActiveDays: number;
   submissions: {
     id: string; problemId: number; problemTitle: string;
     difficulty: string; language: string; status: string;
@@ -40,10 +46,20 @@ const langColor: Record<string, string> = {
   cpp:        "bg-purple-400/10 text-purple-400",
 };
 
+function xpToLevel(xp: number) {
+  if (xp < 100)  return { level: 1, title: "Novice",      next: 100 };
+  if (xp < 300)  return { level: 2, title: "Apprentice",  next: 300 };
+  if (xp < 600)  return { level: 3, title: "Practitioner", next: 600 };
+  if (xp < 1000) return { level: 4, title: "Proficient",  next: 1000 };
+  if (xp < 2000) return { level: 5, title: "Expert",      next: 2000 };
+  if (xp < 4000) return { level: 6, title: "Master",      next: 4000 };
+  return { level: 7, title: "Legend", next: xp };
+}
+
 function ProgressRing({ value, max, size = 100, stroke = 8, color = "#0071e3" }: { value: number; max: number; size?: number; stroke?: number; color?: string }) {
-  const r   = (size - stroke) / 2;
+  const r    = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
-  const pct  = max > 0 ? value / max : 0;
+  const pct  = max > 0 ? Math.min(value / max, 1) : 0;
   return (
     <svg width={size} height={size} className="-rotate-90">
       <circle cx={size / 2} cy={size / 2} r={r} stroke="#21262d" strokeWidth={stroke} fill="none" />
@@ -87,10 +103,12 @@ export default function DashboardPage() {
 
   if (!session) return null;
 
-  const user      = stats?.user;
-  const initials  = user?.name ? user.name.trim()[0].toUpperCase() : "?";
-  const joinDate  = user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "";
-  const pct       = stats ? Math.round((stats.totalSolved / stats.totalProblems) * 100) : 0;
+  const user     = stats?.user;
+  const initials = user?.name ? user.name.trim()[0].toUpperCase() : "?";
+  const joinDate = user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "";
+  const pct      = stats ? Math.round((stats.totalSolved / stats.totalProblems) * 100) : 0;
+  const lvl      = xpToLevel(stats?.xp ?? 0);
+  const xpPct    = lvl.level < 7 ? Math.min(((stats?.xp ?? 0) / lvl.next) * 100, 100) : 100;
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
@@ -109,7 +127,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 py-10 space-y-6">
 
         {/* Profile + Solved ring */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -119,16 +137,36 @@ export default function DashboardPage() {
             {user?.image ? (
               <Image src={user.image} alt={user.name} width={72} height={72} className="rounded-full ring-2 ring-[#0071e3]/40" />
             ) : (
-              <div className="w-18 h-18 w-[72px] h-[72px] rounded-full bg-gradient-to-br from-[#0071e3] to-[#00c9ff] flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
+              <div className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-[#0071e3] to-[#00c9ff] flex items-center justify-center text-2xl font-bold text-white flex-shrink-0">
                 {initials}
               </div>
             )}
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-white">{user?.name}</h1>
               <p className="text-[#8b949e] text-sm">{user?.email}</p>
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-[#8b949e]">
+              <div className="flex items-center gap-1.5 mt-1.5 text-xs text-[#8b949e]">
                 <Calendar className="w-3.5 h-3.5" />
                 Member since {joinDate}
+              </div>
+              {/* XP Level bar */}
+              <div className="mt-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-[#0071e3] flex items-center gap-1">
+                    <Star className="w-3 h-3" /> Lv.{lvl.level} {lvl.title}
+                  </span>
+                  <span className="text-xs text-[#8b949e]">{stats?.xp ?? 0} XP</span>
+                </div>
+                <div className="h-1.5 bg-[#21262d] rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xpPct}%` }}
+                    transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
+                    className="h-full rounded-full bg-gradient-to-r from-[#0071e3] to-[#00c9ff]"
+                  />
+                </div>
+                {lvl.level < 7 && (
+                  <div className="text-[10px] text-[#8b949e] mt-0.5">{lvl.next - (stats?.xp ?? 0)} XP to next level</div>
+                )}
               </div>
             </div>
             <div className="hidden sm:flex flex-col items-center gap-1">
@@ -167,14 +205,15 @@ export default function DashboardPage() {
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
-            { icon: <Trophy className="w-5 h-5 text-yellow-400" />, label: "Solved",       value: stats?.totalSolved ?? 0,      sub: "problems" },
-            { icon: <Target className="w-5 h-5 text-[#0071e3]" />,  label: "Submissions",  value: stats?.totalSubmissions ?? 0,  sub: "total" },
+            { icon: <Trophy className="w-5 h-5 text-yellow-400" />, label: "Solved",       value: stats?.totalSolved ?? 0,       sub: "problems" },
+            { icon: <Target className="w-5 h-5 text-[#0071e3]" />,  label: "Submissions",  value: stats?.totalSubmissions ?? 0,   sub: "total" },
             { icon: <TrendingUp className="w-5 h-5 text-green-400" />, label: "Acceptance", value: `${stats?.acceptanceRate ?? 0}%`, sub: "rate" },
             { icon: <Code2 className="w-5 h-5 text-purple-400" />,  label: "Languages",    value: Object.keys(stats?.languages ?? {}).length, sub: "used" },
+            { icon: <Star className="w-5 h-5 text-yellow-300" />,   label: "XP",           value: stats?.xp ?? 0,                sub: `Lv.${lvl.level} ${lvl.title}` },
           ].map((s, i) => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * i }}
+            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}
               className="bg-[#161b22] border border-[#21262d] rounded-xl p-4">
               <div className="flex items-center gap-2 mb-2">{s.icon}<span className="text-xs text-[#8b949e]">{s.label}</span></div>
               <div className="text-2xl font-bold text-white">{s.value}</div>
@@ -183,9 +222,40 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* Streak banner (only shown when active) */}
+        {(stats?.currentStreak ?? 0) > 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-gradient-to-r from-orange-500/10 to-red-500/5 border border-orange-500/20 rounded-2xl px-5 py-4 flex items-center gap-4"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-3xl">🔥</span>
+              <div>
+                <div className="text-lg font-bold text-orange-400">{stats?.currentStreak}-Day Streak!</div>
+                <div className="text-xs text-[#8b949e]">Keep going — solve a problem today to extend it. Personal best: {stats?.maxStreak} days</div>
+              </div>
+            </div>
+            <Link href="/practice" className="ml-auto flex-shrink-0 px-4 py-2 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-400 text-xs font-semibold rounded-xl transition-colors">
+              Solve now →
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Activity Calendar */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+          <ActivityCalendar
+            activityCalendar={stats?.activityCalendar ?? []}
+            totalActiveDays={stats?.totalActiveDays ?? 0}
+            currentStreak={stats?.currentStreak ?? 0}
+            maxStreak={stats?.maxStreak ?? 0}
+          />
+        </motion.div>
+
         {/* Languages used */}
         {stats && Object.keys(stats.languages).length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl p-5">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl p-5">
             <div className="text-sm font-semibold text-[#8b949e] uppercase tracking-wider mb-4">Languages Used</div>
             <div className="flex flex-wrap gap-3">
               {Object.entries(stats.languages).map(([lang, count]) => (
@@ -199,7 +269,7 @@ export default function DashboardPage() {
         )}
 
         {/* Recent submissions */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl overflow-hidden">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#21262d]">
             <div className="text-sm font-semibold text-[#8b949e] uppercase tracking-wider">Recent Submissions</div>
             <Link href="/practice" className="text-xs text-[#0071e3] hover:underline flex items-center gap-1">
@@ -244,7 +314,8 @@ export default function DashboardPage() {
             className="bg-gradient-to-r from-[#0071e3]/10 to-[#00c9ff]/5 border border-[#0071e3]/20 rounded-2xl p-6 text-center">
             <Trophy className="w-10 h-10 text-yellow-400 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-white mb-1">Start your journey</h3>
-            <p className="text-sm text-[#8b949e] mb-4">Solve your first problem to see your stats here.</p>
+            <p className="text-sm text-[#8b949e] mb-1">Solve your first problem to earn XP and start your streak.</p>
+            <p className="text-xs text-[#8b949e] mb-4">Easy = +10 XP · Medium = +25 XP · Hard = +50 XP</p>
             <Link href="/practice" className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0071e3] hover:bg-[#0058b3] text-white font-semibold rounded-xl text-sm transition-colors">
               Go to Practice Arena <ArrowRight className="w-4 h-4" />
             </Link>

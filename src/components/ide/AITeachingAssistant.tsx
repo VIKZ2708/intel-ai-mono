@@ -4,64 +4,136 @@ import { useState, useRef, useEffect } from "react";
 import { Bot, Send, X, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { Problem } from "@/lib/problems";
 
+type Mode = "beginner" | "standard" | "expert";
+
 interface Message { id: number; role: "user" | "assistant"; text: string; }
 
-function getIDEResponse(input: string, problem: Problem, code: string, hintIdx: number, onHint: () => void): string {
+const MODES: { id: Mode; label: string; emoji: string; desc: string }[] = [
+  { id: "beginner", label: "Beginner", emoji: "🐣", desc: "Simple explanations, more encouragement" },
+  { id: "standard", label: "Standard", emoji: "⚡", desc: "Balanced guidance" },
+  { id: "expert",   label: "Expert",   emoji: "🔥", desc: "Terse, focus on optimality" },
+];
+
+function getIDEResponse(input: string, problem: Problem, code: string, hintIdx: number, onHint: () => void, mode: Mode): string {
   const q = input.toLowerCase();
 
-  // Hint requests — check specific variants BEFORE the generic "hint" check
-  if (q.includes("hint") || q.includes("help") || q.includes("stuck")) {
+  const wrap = (standard: string, beginner: string, expert: string) =>
+    mode === "beginner" ? beginner : mode === "expert" ? expert : standard;
+
+  if (q.includes("hint") || q.includes("help") || q.includes("stuck") || q.includes("nudge")) {
     if (hintIdx >= problem.hints.length) {
-      return `You've already seen all ${problem.hints.length} hints for **${problem.title}**! Give the problem a shot — you have everything you need.`;
+      return wrap(
+        `You've already seen all ${problem.hints.length} hints for **${problem.title}**! Give the problem a shot — you have everything you need.`,
+        `You've unlocked all hints for **${problem.title}**! 🎉 Don't worry — you've got this. Try writing even a brute-force solution first, it's okay!`,
+        `All ${problem.hints.length} hints exhausted for **${problem.title}**. Implement now.`,
+      );
     }
     onHint();
     const hint = problem.hints[hintIdx];
     const hasMore = hintIdx + 1 < problem.hints.length;
-    return `**Hint ${hintIdx + 1}/${problem.hints.length}** — **${problem.title}**:\n\n${hint}${hasMore ? "\n\nWant another hint? Just ask!" : "\n\nThat's all the hints — give it a try!"}`;
+    return wrap(
+      `**Hint ${hintIdx + 1}/${problem.hints.length}** — **${problem.title}**:\n\n${hint}${hasMore ? "\n\nWant another hint? Just ask!" : "\n\nThat's all the hints — give it a try!"}`,
+      `**Gentle Nudge ${hintIdx + 1}/${problem.hints.length}** 💡\n\n${hint}\n\n${hasMore ? "No rush! Want another small clue? Just say 'hint' again 😊" : "That's the last hint! You're so close — give it a go!"}`,
+      `[${hintIdx + 1}/${problem.hints.length}] ${hint}`,
+    );
   }
 
   if (q.includes("approach") || q.includes("how to solve") || q.includes("algorithm")) {
     const approaches: Record<string, string> = {
-      Arrays: "For array problems, think about sorting, two pointers, or hash maps to reduce time complexity.",
-      Stack: "Stack problems follow LIFO order. Think about what needs to be 'remembered' and 'matched' later.",
-      "Dynamic Programming": "DP problems have optimal substructure. Define your state, write the recurrence relation, then implement top-down (memoization) or bottom-up.",
-      Greedy: "Greedy algorithms make the locally optimal choice at each step. Think: what's the best decision I can make right now?",
-      "Binary Search": "Binary search works on sorted data. Define your search space and shrink it by half each iteration.",
-      "Sliding Window": "Use two pointers to maintain a window. Expand right, shrink left when a condition is violated.",
-      Graphs: "Graph problems: think BFS for shortest path, DFS for connectivity, and mark visited nodes to avoid cycles.",
-      Backtracking: "Backtracking explores all possibilities by building candidates and abandoning them when they fail constraints.",
+      Arrays: "Think about sorting, two pointers, or hash maps to reduce time complexity.",
+      Stack: "Stack → LIFO. What needs to be remembered and matched later?",
+      "Dynamic Programming": "Define your state, write the recurrence, implement top-down or bottom-up.",
+      Greedy: "Make the locally optimal choice at each step.",
+      "Binary Search": "Works on sorted data. Define your search space and halve it each step.",
+      "Sliding Window": "Two pointers, expand right, shrink left when condition breaks.",
+      Graphs: "BFS for shortest path, DFS for connectivity. Mark visited.",
+      Backtracking: "Build candidates, abandon them when they violate constraints.",
     };
-    return approaches[problem.category] ?? "Break the problem into smaller subproblems and think about what data structure fits best.";
+    const core = approaches[problem.category] ?? "Break into smaller subproblems, pick the right data structure.";
+    return wrap(
+      `For **${problem.title}** (${problem.category}):\n\n${core}\n\nHint: start with a brute force, then optimize.`,
+      `Great question! 😊 For **${problem.title}**, the category is **${problem.category}**.\n\n${core}\n\nTip: Don't stress about the optimal solution right away. A working brute-force first is always fine!`,
+      `${problem.category}: ${core}`,
+    );
   }
+
   if (q.includes("time complexity") || q.includes("big o") || q.includes("complexity")) {
-    return `For **${problem.title}**, think about:\n- A brute force solution is usually O(n²) or worse.\n- An optimal solution uses the right data structure (hash map, stack, etc.) to bring it to O(n) or O(n log n).\n\nWhat complexity is your current approach?`;
+    return wrap(
+      `For **${problem.title}**:\n- Brute force: usually O(n²)\n- Optimal: aim for O(n) or O(n log n) with the right data structure\n\nWhat's your current approach's complexity?`,
+      `Time complexity can sound scary at first — but it's just about how your code scales! 📈\n\nFor **${problem.title}**:\n- A slow but simple approach is usually O(n²) — runs the loop twice\n- A smarter approach with a hash map or sort often brings it to O(n) or O(n log n)\n\nWhat does your solution look like so far?`,
+      `Brute: O(n²). Target: O(n) or O(n log n). What's your current bound?`,
+    );
   }
+
   if (q.includes("space complexity") || q.includes("memory")) {
-    return `Space complexity depends on your extra data structures. An O(1) space solution would use only pointers/variables. An O(n) solution might use a hash map or stack. For **${problem.title}**, try to think if you can solve it in O(1) extra space.`;
+    return wrap(
+      `Space depends on extra structures. O(1) = only variables. O(n) = hash map / stack. For **${problem.title}**, can you do it in O(1) extra space?`,
+      `Space complexity is just "how much extra memory do you use?" 🧠\n\n- O(1): just a few variables — super efficient!\n- O(n): a list, map, or stack that grows with input\n\nFor **${problem.title}**, try to see if you can get away with just a couple of variables. But O(n) is totally fine for now!`,
+      `O(1) preferred. O(n) acceptable. Can **${problem.title}** be solved in-place?`,
+    );
   }
+
   if (q.includes("what") && (q.includes("problem") || q.includes("asking"))) {
-    return `**${problem.title}** asks you to:\n\n${problem.description.split('\n')[0]}\n\nThe key constraint is: ${problem.constraints[0]}`;
+    return wrap(
+      `**${problem.title}** asks you to:\n\n${problem.description.split('\n')[0]}\n\nKey constraint: ${problem.constraints[0]}`,
+      `No worries, let me break it down! 😊\n\n**${problem.title}** is asking you to:\n\n${problem.description.split('\n')[0]}\n\nThe tricky part is working within: _${problem.constraints[0]}_\n\nDoes that make more sense now?`,
+      `**${problem.title}**: ${problem.description.split('\n')[0]} Constraint: ${problem.constraints[0]}`,
+    );
   }
+
   if (q.includes("example") || q.includes("walkthrough") || q.includes("trace")) {
     const ex = problem.examples[0];
-    return `Let's walk through Example 1:\n\n**Input:** ${ex.input}\n**Expected Output:** ${ex.output}\n${ex.explanation ? `\n**Why:** ${ex.explanation}` : ""}\n\nCan you trace through your code with this example manually?`;
+    return wrap(
+      `Let's trace Example 1:\n\n**Input:** ${ex.input}\n**Expected:** ${ex.output}\n${ex.explanation ? `\n**Why:** ${ex.explanation}` : ""}\n\nTrace through your code manually with this input.`,
+      `Let's go through an example together step by step! 🐾\n\n**Input:** ${ex.input}\n**What we expect:** ${ex.output}\n${ex.explanation ? `\n**Here's why:** ${ex.explanation}` : ""}\n\nNow try to trace your code line by line with this input. What value do you get at each step?`,
+      `Ex1: in=${ex.input} → out=${ex.output}. ${ex.explanation ?? ""} Trace manually.`,
+    );
   }
-  if (q.includes("review") || q.includes("check my code") || q.includes("feedback")) {
+
+  if (q.includes("review") || q.includes("check my code") || q.includes("feedback") || q.includes("wrong")) {
     if (code.includes("Write your solution here") || code.trim().length < 80) {
-      return "It looks like you haven't started coding yet! Start by thinking about the approach. What data structure would help here? Type 'hint' for a nudge in the right direction.";
+      return wrap(
+        "You haven't started yet! Think about the approach first. Type 'hint' for a nudge.",
+        "It looks like you haven't written any code yet — that's totally okay! 😊 Start by typing out even a rough idea. What's the first thing you think should happen? Type 'hint' if you want a little push!",
+        "No code detected. Write a draft first.",
+      );
     }
-    return `I can see you've written some code. A few things to check:\n1. Does your code handle edge cases? (empty input, single element, all same values)\n2. Have you traced through the examples manually?\n3. What is the time complexity of your solution?\n\nType 'run' in the console to test against the examples!`;
+    return wrap(
+      `I see code! Check:\n1. Edge cases? (empty input, single element, duplicates)\n2. Traced through Example 1 manually?\n3. What's your time complexity?\n\nRun your code against the test cases first.`,
+      `Nice work starting! 🎉 Here are a few friendly checks:\n1. **Edge cases** — what happens if the input is empty, or has just one item?\n2. **Example trace** — have you run through Example 1 on paper?\n3. **Correctness first** — don't worry about speed yet, just make it work!\n\nHit "Run" to see what the test cases say!`,
+      `Code present. Verify: edge cases covered? Complexity optimal? Run tests.`,
+    );
   }
+
   if (q.includes("brute force") || q.includes("naive")) {
-    return `A brute force approach for **${problem.title}** would work but might be slow. The naive solution is usually O(n²). Think about how to optimize it — often a hash map, sorting, or a two-pointer technique can bring it to O(n) or O(n log n).`;
+    return wrap(
+      `A brute force for **${problem.title}** is usually O(n²). It works but is slow. Think: hash map, sort, or two pointers to get to O(n).`,
+      `Brute force is a great starting point — no shame in it! 💪\n\nFor **${problem.title}**, the slow-but-works approach usually runs the loops twice (O(n²)).\n\nOnce you have that working, we can look at making it faster together!`,
+      `Brute O(n²). Optimize via hash map or sort to O(n).`,
+    );
   }
+
   if (q.includes("optimiz") || q.includes("faster") || q.includes("efficient")) {
-    return `To optimize **${problem.title}**:\n\n${problem.hints[problem.hints.length - 1]}\n\nThe key insight is usually about avoiding repeated work. Can you precompute or cache something?`;
+    return wrap(
+      `To optimize **${problem.title}**:\n\n${problem.hints[problem.hints.length - 1]}\n\nKey: avoid repeated work. Can you precompute or cache something?`,
+      `Love that you're thinking about efficiency! 🚀\n\nThe key insight for **${problem.title}** is:\n\n_${problem.hints[problem.hints.length - 1]}_\n\nA common trick: if you're looping over the same data twice, ask yourself — "can I store something the first time through to avoid the second loop?"`,
+      `Optimize **${problem.title}**: ${problem.hints[problem.hints.length - 1]}`,
+    );
   }
+
   if (q.includes("hello") || q.includes("hi") || q.includes("hey")) {
-    return `Hey! 👋 I'm your AI teaching assistant for this problem. I can help you with:\n- Hints (type "hint")\n- Approach and algorithm\n- Complexity analysis\n- Walkthrough of examples\n- Code review\n\nWhat do you need help with?`;
+    return wrap(
+      `Hey! 👋 I'm your AI teaching assistant. Ask me for:\n- Hints\n- Approach / algorithm\n- Complexity analysis\n- Code review\n- Example walkthrough`,
+      `Hey! 👋😊 So glad you're here! I'm your AI tutor for this problem.\n\nI'm here to help you *learn*, not just copy-paste. Here's what I can do:\n- 💡 **Hints** — gentle nudges when you're stuck\n- 🗺️ **Approach** — how to think about the problem\n- 🔍 **Code review** — check if you're on the right track\n- 📊 **Complexity** — time and space analysis\n\nWhat do you need? No question is too basic! 😊`,
+      `Ready. Ask for hint / approach / complexity / review.`,
+    );
   }
-  return `Good question! For **${problem.title}** (${problem.category}), I'd suggest thinking about the hints:\n\n"${problem.hints[0]}"\n\nIf you're stuck on something specific, describe what you've tried and I'll guide you further!`;
+
+  return wrap(
+    `For **${problem.title}** (${problem.category}): "${problem.hints[0]}"\n\nDescribe what you've tried and I'll guide you further.`,
+    `Don't give up! 💪 Here's a starting clue for **${problem.title}**:\n\n_"${problem.hints[0]}"_\n\nTell me what you've tried so far — even a rough idea helps! There are no wrong answers when you're learning 😊`,
+    `**${problem.title}**: ${problem.hints[0]}`,
+  );
 }
 
 interface Props {
@@ -72,16 +144,17 @@ interface Props {
 }
 
 export default function AITeachingAssistant({ problem, code, isOpen, onClose }: Props) {
+  const [mode, setMode]         = useState<Mode>("standard");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 0,
       role: "assistant",
-      text: `Hi! 👋 I'm your AI teaching assistant for **${problem.title}**. Ask me for hints, approach guidance, complexity analysis, or code review. I'm here to help you learn — not just give you the answer!`,
+      text: `Hi! 👋 I'm your AI teaching assistant for **${problem.title}**. Ask me for hints, approach guidance, complexity analysis, or code review. I'm here to help you *learn* — not just give you the answer!`,
     },
   ]);
-  const [input, setInput] = useState("");
+  const [input, setInput]             = useState("");
   const [hintsExpanded, setHintsExpanded] = useState(false);
-  const [hintIndex, setHintIndex] = useState(0);
+  const [hintIndex, setHintIndex]     = useState(0);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,17 +168,24 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     const currentHintIndex = hintIndex;
+    const currentMode = mode;
     setTimeout(() => {
       const reply: Message = {
         id: Date.now() + 1,
         role: "assistant",
-        text: getIDEResponse(msg, problem, code, currentHintIndex, () => setHintIndex(i => Math.min(i + 1, problem.hints.length))),
+        text: getIDEResponse(msg, problem, code, currentHintIndex, () => setHintIndex(i => Math.min(i + 1, problem.hints.length)), currentMode),
       };
       setMessages((prev) => [...prev, reply]);
-    }, 500);
+    }, 400);
   }
 
   if (!isOpen) return null;
+
+  const quickActions: Record<Mode, string[]> = {
+    beginner: ["I'm stuck, help!", "Can you explain the problem?", "Show me an example", "What should I try first?"],
+    standard: ["Give me a hint", "Explain the approach", "Review my code", "Time complexity?"],
+    expert:   ["Optimal approach?", "Complexity bounds", "Edge cases", "Optimize my code"],
+  };
 
   return (
     <div className="flex flex-col h-full bg-[#0d1117] border-l border-[#21262d]">
@@ -125,6 +205,27 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
         <button onClick={onClose} className="p-1.5 rounded-md text-[#8b949e] hover:text-white hover:bg-white/5">
           <X className="w-3.5 h-3.5" />
         </button>
+      </div>
+
+      {/* Mode selector */}
+      <div className="px-3 py-2 border-b border-[#21262d] bg-[#0d1117]">
+        <div className="flex gap-1">
+          {MODES.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMode(m.id)}
+              title={m.desc}
+              className={`flex-1 flex items-center justify-center gap-1 text-[10px] py-1.5 rounded-lg font-medium transition-all ${
+                mode === m.id
+                  ? "bg-[#0071e3]/15 text-[#0071e3] border border-[#0071e3]/30"
+                  : "text-[#8b949e] hover:text-white hover:bg-white/5 border border-transparent"
+              }`}
+            >
+              <span>{m.emoji}</span>
+              <span>{m.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Quick hints toggle */}
@@ -165,7 +266,7 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
 
       {/* Quick actions */}
       <div className="px-3 pb-2 flex flex-wrap gap-1.5">
-        {["Give me a hint", "Explain the approach", "Review my code", "Time complexity?"].map((q) => (
+        {quickActions[mode].map((q) => (
           <button
             key={q}
             onClick={() => send(q)}
@@ -184,7 +285,7 @@ export default function AITeachingAssistant({ problem, code, isOpen, onClose }: 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="Ask for help..."
+            placeholder={mode === "beginner" ? "Ask anything, no question is too basic!" : mode === "expert" ? "Ask about complexity, edge cases..." : "Ask for help..."}
             className="flex-1 px-3 py-2 bg-[#161b22] border border-[#21262d] rounded-lg text-xs text-white placeholder-[#8b949e] focus:outline-none focus:border-[#0071e3]"
           />
           <button

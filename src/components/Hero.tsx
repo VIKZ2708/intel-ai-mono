@@ -2,8 +2,84 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useInView, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Play, Star } from "lucide-react";
+import { ArrowRight, Play, Star, X } from "lucide-react";
 import LiveCodeWindow from "./LiveCodeWindow";
+
+// ── Swap this URL once the HeyGen video is ready ──────────────────────────────
+const DEMO_VIDEO_URL = "";
+
+function VideoModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  const isEmbed = DEMO_VIDEO_URL.includes("youtube") || DEMO_VIDEO_URL.includes("youtu.be") || DEMO_VIDEO_URL.includes("vimeo") || DEMO_VIDEO_URL.includes("heygen");
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1,    y: 0  }}
+          exit={{    opacity: 0, scale: 0.95, y: 20  }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-4xl rounded-2xl overflow-hidden border border-[#21262d] shadow-2xl bg-[#0d1117]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-[#161b22] border border-[#21262d] flex items-center justify-center text-[#8b949e] hover:text-white hover:border-[#30363d] transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
+
+          {/* 16:9 video container */}
+          <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+            {DEMO_VIDEO_URL ? (
+              isEmbed ? (
+                <iframe
+                  src={DEMO_VIDEO_URL}
+                  className="absolute inset-0 w-full h-full"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={DEMO_VIDEO_URL}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  controls
+                  autoPlay
+                />
+              )
+            ) : (
+              // Placeholder until video is ready
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#161b22]">
+                <div className="w-16 h-16 rounded-full bg-[#0071e3]/10 border border-[#0071e3]/30 flex items-center justify-center">
+                  <Play className="w-7 h-7 text-[#0071e3] fill-current ml-1" />
+                </div>
+                <p className="text-[#8b949e] text-sm">Demo video coming soon</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 const ACTIVITIES = [
   { msg: "Rahul K. just solved Two Sum",            icon: "🎯" },
@@ -86,8 +162,9 @@ interface HeroProps {
 }
 
 export default function Hero({ onLoginClick }: HeroProps) {
-  const statsRef   = useRef<HTMLDivElement>(null);
+  const statsRef    = useRef<HTMLDivElement>(null);
   const statsInView = useInView(statsRef, { once: true, margin: "-80px" });
+  const [videoOpen, setVideoOpen] = useState(false);
 
   // Parallax: background moves slower than scroll speed
   const { scrollY } = useScroll();
@@ -188,7 +265,7 @@ export default function Hero({ onLoginClick }: HeroProps) {
                 <ArrowRight className="w-4 h-4" />
               </a>
               <button
-                onClick={onLoginClick}
+                onClick={() => setVideoOpen(true)}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-[#30363d] hover:border-[#0071e3]/50 text-white font-semibold rounded-xl text-base transition-all duration-200 hover:-translate-y-0.5"
               >
                 <Play className="w-4 h-4 fill-current text-[#0071e3]" />
@@ -235,6 +312,9 @@ export default function Hero({ onLoginClick }: HeroProps) {
 
       {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0d1117] to-transparent pointer-events-none" />
+
+      {/* Demo video modal */}
+      {videoOpen && <VideoModal onClose={() => setVideoOpen(false)} />}
     </section>
   );
 }

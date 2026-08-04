@@ -28,8 +28,8 @@ const footerLinks = {
     { label: "Practice Problems", href: "/practice" },
     { label: "Study Plan",        href: "/study-plan" },
     { label: "Dashboard",         href: "/dashboard" },
-    { label: "Privacy Policy",    href: "#" },
-    { label: "Terms of Service",  href: "#" },
+    { label: "Privacy Policy",    href: "/privacy-policy" },
+    { label: "Terms of Service",  href: "/terms" },
   ],
 };
 

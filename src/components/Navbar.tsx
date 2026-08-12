@@ -12,12 +12,13 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { label: "Courses",        href: "#courses" },
-  { label: "Learning Paths", href: "#paths" },
-  { label: "Practice",       href: "/practice" },
-  { label: "Study Plan",     href: "/study-plan" },
-  { label: "Leaderboard",    href: "/leaderboard" },
-  { label: "Founders",       href: "#founders" },
+  { label: "Courses",         href: "#courses" },
+  { label: "Learning Paths",  href: "#paths" },
+  { label: "Practice",        href: "/practice" },
+  { label: "Mock Interview",  href: "/mock-interview" },
+  { label: "Study Plan",      href: "/study-plan" },
+  { label: "Leaderboard",     href: "/leaderboard" },
+  { label: "Founders",        href: "#founders" },
 ];
 
 export default function Navbar({ onLoginClick }: NavbarProps) {

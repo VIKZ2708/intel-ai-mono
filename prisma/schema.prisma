@@ -70,14 +70,19 @@ model IntelUser {
   email         String?         @unique
   emailVerified DateTime?
   image         String?
-  password      String?
-  messageCount  Int             @default(0)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  accounts      IntelAccount[]
-  sessions      IntelSession[]
-  submissions   IntelSubmission[]
-  enrollments   IntelEnrollment[]
+  password        String?
+  messageCount    Int             @default(0)
+  xp              Int             @default(0)
+  currentStreak   Int             @default(0)
+  maxStreak       Int             @default(0)
+  lastActiveDate  String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  accounts        IntelAccount[]
+  sessions        IntelSession[]
+  submissions     IntelSubmission[]
+  enrollments     IntelEnrollment[]
+  bookmarks       IntelBookmark[]
 
   @@map("intel_users")
 }
@@ -171,8 +176,22 @@ model IntelProblem {
 
   playlistItems IntelPlaylistItem[]
   solutions     IntelSolution[]
+  bookmarks     IntelBookmark[]
 
   @@map("intel_problems")
+}
+
+model IntelBookmark {
+  id        String       @id @default(cuid())
+  userId    String
+  problemId Int
+  createdAt DateTime     @default(now())
+  user      IntelUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem   IntelProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+  @@index([userId])
+  @@map("intel_bookmarks")
 }
 
 model IntelPlaylist {

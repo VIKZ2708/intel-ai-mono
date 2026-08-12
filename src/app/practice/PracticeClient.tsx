@@ -6,8 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle2, Circle, ChevronDown, ChevronUp,
   Zap, SlidersHorizontal, BookOpen, LayoutDashboard,
-  Trophy, Map, GraduationCap, ChevronRight, ChevronLeft, Flame,
+  Trophy, Map, GraduationCap, ChevronRight, ChevronLeft, Flame, ArrowRight, Bookmark, BookmarkCheck,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { apiFetch } from "@/lib/apiClient";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ProblemRow {
@@ -291,7 +293,7 @@ function MiniCalendar({ month, year, today, activeDays }: {
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function PracticeClient({
   problems, companies, solvedIds, calendarDates,
-  currentMonth, currentYear, todayDate, featuredPlaylists,
+  currentMonth, currentYear, todayDate, featuredPlaylists, dailyProblemId, bookmarkedIds,
 }: {
   problems: ProblemRow[];
   companies: Company[];
@@ -301,8 +303,12 @@ export default function PracticeClient({
   currentYear: number;
   todayDate: number;
   featuredPlaylists: FeaturedPlaylist[];
+  dailyProblemId: number;
+  bookmarkedIds: number[];
 }) {
+  const { data: session } = useSession();
   const solvedSet    = useMemo(() => new Set(solvedIds), [solvedIds]);
+  const [bookmarkSet, setBookmarkSet] = useState(() => new Set(bookmarkedIds));
   const sliderRef    = useRef<HTMLDivElement>(null);
 
   const scrollSlider = (dir: "left" | "right") => {
@@ -314,6 +320,25 @@ export default function PracticeClient({
   const [diffFilter, setDiffFilter]   = useState("All");
   const [catFilter, setCatFilter]     = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
+
+  async function toggleBookmark(e: React.MouseEvent, problemId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!session?.user) return;
+    const next = !bookmarkSet.has(problemId);
+    setBookmarkSet((prev) => {
+      const s = new Set(prev);
+      next ? s.add(problemId) : s.delete(problemId);
+      return s;
+    });
+    apiFetch("/bookmarks", { method: "POST", body: JSON.stringify({ problemId }) }).catch(() => {
+      setBookmarkSet((prev) => {
+        const s = new Set(prev);
+        next ? s.delete(problemId) : s.add(problemId);
+        return s;
+      });
+    });
+  }
   const [sortKey, setSortKey]         = useState<"id" | "acceptance" | "difficulty">("id");
   const [sortAsc, setSortAsc]         = useState(true);
   const [showFilters, setShowFilters] = useState(false);
@@ -325,6 +350,15 @@ export default function PracticeClient({
     for (const p of problems) m[p.category] = (m[p.category] ?? 0) + 1;
     return m;
   }, [problems]);
+
+  const catSolvedCounts = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const id of solvedIds) {
+      const cat = problems.find((p) => p.id === id)?.category;
+      if (cat) m[cat] = (m[cat] ?? 0) + 1;
+    }
+    return m;
+  }, [problems, solvedIds]);
 
   const categories = useMemo(() =>
     [...new Set(problems.map((p) => p.category))].sort(), [problems]);
@@ -344,7 +378,8 @@ export default function PracticeClient({
       const matchDiff   = diffFilter === "All" || p.difficulty === diffFilter;
       const matchCat    = catFilter  === "All" || p.category   === catFilter;
       const matchStatus = statusFilter === "All" ? true
-        : statusFilter === "Solved" ? solvedSet.has(p.id)
+        : statusFilter === "Solved"     ? solvedSet.has(p.id)
+        : statusFilter === "Bookmarked" ? bookmarkSet.has(p.id)
         : !solvedSet.has(p.id);
       return matchSearch && matchDiff && matchCat && matchStatus;
     });
@@ -583,6 +618,38 @@ export default function PracticeClient({
                 );
               })}
             </div>
+
+            {/* Topics breakdown */}
+            <div className="mt-3 bg-[#161b22] border border-[#21262d] rounded-xl p-3">
+              <p className="text-[10px] text-[#6e7681] uppercase tracking-wider mb-3">Topics</p>
+              <div className="space-y-2">
+                {categories.map((cat) => {
+                  const total  = catCounts[cat] ?? 0;
+                  const solved = catSolvedCounts[cat] ?? 0;
+                  const pct    = total > 0 ? (solved / total) * 100 : 0;
+                  return (
+                    <button key={cat} onClick={() => setCatFilter(catFilter === cat ? "All" : cat)}
+                      className={`w-full text-left group ${catFilter === cat ? "opacity-100" : "opacity-80 hover:opacity-100"} transition-opacity`}
+                    >
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[10px] font-medium text-[#c9d1d9] truncate pr-1 group-hover:text-white transition-colors">{cat}</span>
+                        <span className="text-[9px] text-[#6e7681] flex-shrink-0">{solved}/{total}</span>
+                      </div>
+                      <div className="h-1 bg-[#21262d] rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${pct}%`,
+                            backgroundColor: CAT_COLOR[cat] ?? "#0071e3",
+                            opacity: catFilter === cat ? 1 : 0.6,
+                          }}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </aside>
 
           {/* ── Main content ── */}
@@ -599,16 +666,23 @@ export default function PracticeClient({
               >
                 All Topics <span className="opacity-60">{problems.length}</span>
               </button>
-              {categories.map((cat) => (
-                <button key={cat} onClick={() => setCatFilter(catFilter === cat ? "All" : cat)}
-                  style={catFilter === cat ? { borderColor: `${CAT_COLOR[cat] ?? "#8b949e"}50`, backgroundColor: `${CAT_COLOR[cat] ?? "#8b949e"}18`, color: CAT_COLOR[cat] ?? "#8b949e" } : {}}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-all shrink-0 ${
-                    catFilter === cat ? "" : "bg-[#161b22] border-[#21262d] text-[#8b949e] hover:text-white hover:border-[#30363d]"
-                  }`}
-                >
-                  {cat} <span className="opacity-60">{catCounts[cat] ?? 0}</span>
-                </button>
-              ))}
+              {categories.map((cat) => {
+                const catTotal  = catCounts[cat] ?? 0;
+                const catSolved = catSolvedCounts[cat] ?? 0;
+                return (
+                  <button key={cat} onClick={() => setCatFilter(catFilter === cat ? "All" : cat)}
+                    style={catFilter === cat ? { borderColor: `${CAT_COLOR[cat] ?? "#8b949e"}50`, backgroundColor: `${CAT_COLOR[cat] ?? "#8b949e"}18`, color: CAT_COLOR[cat] ?? "#8b949e" } : {}}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap border transition-all shrink-0 ${
+                      catFilter === cat ? "" : "bg-[#161b22] border-[#21262d] text-[#8b949e] hover:text-white hover:border-[#30363d]"
+                    }`}
+                  >
+                    {cat}
+                    <span className="opacity-60">
+                      {catSolved > 0 ? `${catSolved}/` : ""}{catTotal}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Filters bar */}
@@ -621,13 +695,16 @@ export default function PracticeClient({
                     <div>
                       <p className="text-[10px] text-[#6e7681] uppercase tracking-wider mb-2">Status</p>
                       <div className="flex gap-1.5">
-                        {["All", "Todo", "Solved"].map((s) => (
+                        {["All", "Todo", "Solved", "Bookmarked"].map((s) => (
                           <button key={s} onClick={() => setStatusFilter(s)}
                             className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
                               statusFilter === s ? "bg-[#0071e3]/10 border-[#0071e3]/30 text-[#3d95f4]" : "border-[#21262d] text-[#8b949e] hover:text-white"
                             }`}
                           >
-                            {s === "Solved" ? `✓ Solved (${solvedCount})` : s === "Todo" ? `○ Todo (${problems.length - solvedCount})` : s}
+                            {s === "Solved"     ? `✓ Solved (${solvedCount})`
+                             : s === "Todo"     ? `○ Todo (${problems.length - solvedCount})`
+                             : s === "Bookmarked" ? `🔖 Saved (${bookmarkSet.size})`
+                             : s}
                           </button>
                         ))}
                       </div>
@@ -650,6 +727,43 @@ export default function PracticeClient({
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Daily challenge banner */}
+            {(() => {
+              const daily = problems.find((p) => p.id === dailyProblemId);
+              if (!daily) return null;
+              const solved = solvedSet.has(daily.id);
+              return (
+                <Link href={`/practice/${daily.id}`}
+                  className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl border border-amber-500/25 bg-amber-500/8 hover:bg-amber-500/12 transition-colors group"
+                >
+                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center">
+                    {solved
+                      ? <CheckCircle2 className="w-4 h-4 text-green-400" />
+                      : <Flame className="w-4 h-4 text-amber-400" />
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Daily Challenge</span>
+                      {solved && <span className="text-[10px] text-green-400 font-semibold">· Completed</span>}
+                    </div>
+                    <div className="text-sm font-medium text-[#e6edf3] group-hover:text-amber-300 truncate transition-colors">
+                      {daily.id}. {daily.title}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`text-xs font-semibold ${DIFF_COLOR[daily.difficulty]}`}>
+                      {daily.difficulty === "Medium" ? "Med." : daily.difficulty}
+                    </span>
+                    {!solved && (
+                      <span className="text-xs text-amber-400/70 font-medium">+2× XP</span>
+                    )}
+                    <ArrowRight className="w-3.5 h-3.5 text-[#6e7681] group-hover:text-amber-400 transition-colors" />
+                  </div>
+                </Link>
+              );
+            })()}
 
             {/* Result info row */}
             <div className="flex items-center justify-between mb-2">
@@ -681,7 +795,7 @@ export default function PracticeClient({
             {/* Problem table */}
             <div className="bg-[#161b22] border border-[#21262d] rounded-xl overflow-hidden">
               {/* Header */}
-              <div className="grid grid-cols-[28px_44px_1fr_90px_72px] items-center px-4 py-2.5 border-b border-[#21262d] text-[10px] text-[#6e7681] uppercase tracking-wider font-medium">
+              <div className="grid grid-cols-[28px_44px_1fr_90px_72px_28px] items-center px-4 py-2.5 border-b border-[#21262d] text-[10px] text-[#6e7681] uppercase tracking-wider font-medium">
                 <div />
                 <button onClick={() => toggleSort("id")} className="text-left hover:text-white flex items-center gap-0.5">
                   # <SortIcon col="id" />
@@ -693,6 +807,7 @@ export default function PracticeClient({
                 <button onClick={() => toggleSort("difficulty")} className="flex items-center gap-0.5 hover:text-white">
                   Diff. <SortIcon col="difficulty" />
                 </button>
+                <div />
               </div>
 
               {/* Body */}
@@ -708,15 +823,18 @@ export default function PracticeClient({
                     </div>
                   ) : (
                     paginated.map((p, i) => {
-                      const solved = solvedSet.has(p.id);
+                      const solved  = solvedSet.has(p.id);
+                      const isDaily = p.id === dailyProblemId;
                       return (
                         <Link key={p.id} href={`/practice/${p.id}`}
-                          className={`grid grid-cols-[28px_44px_1fr_90px_72px] items-center px-4 py-3 border-b border-[#21262d] last:border-0 transition-colors group ${i % 2 === 0 ? "" : "bg-[#0d1117]/30"} hover:bg-[#1c2333]`}
+                          className={`grid grid-cols-[28px_44px_1fr_90px_72px_28px] items-center px-4 py-3 border-b border-[#21262d] last:border-0 transition-colors group ${isDaily ? "bg-amber-500/4 hover:bg-amber-500/8" : i % 2 === 0 ? "" : "bg-[#0d1117]/30"} hover:bg-[#1c2333]`}
                         >
                           <div className="flex items-center justify-center">
                             {solved
                               ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                              : <Circle className="w-3.5 h-3.5 text-[#30363d]" />
+                              : isDaily
+                                ? <Flame className="w-3.5 h-3.5 text-amber-400" />
+                                : <Circle className="w-3.5 h-3.5 text-[#30363d]" />
                             }
                           </div>
                           <div className="text-xs text-[#6e7681] font-mono">{p.id}.</div>
@@ -725,6 +843,11 @@ export default function PracticeClient({
                               <span className="text-sm font-medium text-[#e6edf3] group-hover:text-[#3d95f4] transition-colors truncate">
                                 {p.title}
                               </span>
+                              {isDaily && (
+                                <span className="hidden sm:inline-flex shrink-0 items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border border-amber-500/30 bg-amber-500/10 text-amber-400">
+                                  <Flame className="w-2.5 h-2.5" /> Daily
+                                </span>
+                              )}
                               <span className="hidden sm:inline-flex shrink-0 items-center px-1.5 py-0.5 rounded text-[10px] font-medium border"
                                 style={{
                                   color: CAT_COLOR[p.category] ?? "#6e7681",
@@ -745,6 +868,17 @@ export default function PracticeClient({
                             <span className={`text-xs font-semibold ${DIFF_COLOR[p.difficulty] ?? "text-[#8b949e]"}`}>
                               {p.difficulty === "Medium" ? "Med." : p.difficulty}
                             </span>
+                          </div>
+                          <div className="flex items-center justify-center">
+                            <button
+                              onClick={(e) => toggleBookmark(e, p.id)}
+                              className={`opacity-0 group-hover:opacity-100 transition-opacity ${bookmarkSet.has(p.id) ? "!opacity-100 text-amber-400" : "text-[#6e7681] hover:text-amber-400"}`}
+                            >
+                              {bookmarkSet.has(p.id)
+                                ? <BookmarkCheck className="w-3.5 h-3.5" />
+                                : <Bookmark className="w-3.5 h-3.5" />
+                              }
+                            </button>
                           </div>
                         </Link>
                       );

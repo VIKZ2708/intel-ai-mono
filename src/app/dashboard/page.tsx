@@ -26,6 +26,8 @@ interface Stats {
   maxStreak:       number;
   activityCalendar: { date: string; count: number }[];
   totalActiveDays: number;
+  categoryProgress: { category: string; solved: number; total: number }[];
+  badges: { slug: string; name: string; icon: string; desc: string; awardedAt: string }[];
   submissions: {
     id: string; problemId: number; problemTitle: string;
     difficulty: string; language: string; status: string;
@@ -75,11 +77,17 @@ function ProgressRing({ value, max, size = 100, stroke = 8, color = "#0071e3" }:
   );
 }
 
+interface DailyChallenge {
+  problem: { id: number; title: string; slug: string; difficulty: string; category: string } | null;
+  completedToday: boolean;
+}
+
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router  = useRouter();
   const [stats, setStats]     = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [daily, setDaily]     = useState<DailyChallenge | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/");
@@ -92,6 +100,10 @@ export default function DashboardPage() {
       .then((r) => r.json())
       .then((d) => { setStats(d); setLoading(false); })
       .catch(() => setLoading(false));
+    apiFetch("/daily")
+      .then((r) => r.json())
+      .then((d) => setDaily(d))
+      .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, router]);
 
@@ -223,6 +235,48 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* Today's Challenge card */}
+        {daily?.problem && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className="bg-[#161b22] border border-amber-500/20 rounded-2xl px-5 py-4"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Flame className="w-4 h-4 text-amber-400" />
+              <span className="text-sm font-bold text-amber-400">Today&apos;s Challenge</span>
+              {daily.completedToday && (
+                <span className="ml-auto flex items-center gap-1 text-xs text-green-400 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Completed
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-base font-semibold text-white truncate">
+                  {daily.problem.id}. {daily.problem.title}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`text-xs font-semibold ${diffColor[daily.problem.difficulty]?.split(" ")[0] ?? "text-[#8b949e]"}`}>
+                    {daily.problem.difficulty}
+                  </span>
+                  <span className="text-xs text-[#8b949e]">· {daily.problem.category}</span>
+                  {!daily.completedToday && (
+                    <span className="text-xs text-amber-400/80 font-medium">· Bonus XP on solve</span>
+                  )}
+                </div>
+              </div>
+              {!daily.completedToday && (
+                <Link
+                  href={`/practice/${daily.problem.id}`}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/25 text-amber-400 text-xs font-semibold rounded-xl transition-colors"
+                >
+                  Solve now <ArrowRight className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {/* Streak banner (only shown when active) */}
         {(stats?.currentStreak ?? 0) > 0 && (
           <motion.div
@@ -253,6 +307,61 @@ export default function DashboardPage() {
             maxStreak={stats?.maxStreak ?? 0}
           />
         </motion.div>
+
+        {/* Progress by Topic */}
+        {stats && stats.categoryProgress.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm font-semibold text-[#8b949e] uppercase tracking-wider">Progress by Topic</div>
+              <div className="text-xs text-[#8b949e]">{stats.totalSolved}/{stats.totalProblems} total</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {stats.categoryProgress.map(({ category, solved, total }) => {
+                const pct = total > 0 ? (solved / total) * 100 : 0;
+                const done = solved === total && total > 0;
+                return (
+                  <div key={category} className="bg-[#0d1117] border border-[#21262d] rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-[#c9d1d9] truncate pr-2">{category}</span>
+                      <span className={`text-xs font-semibold flex-shrink-0 ${done ? "text-green-400" : solved > 0 ? "text-[#0071e3]" : "text-[#6e7681]"}`}>
+                        {solved}/{total}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-[#21262d] rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.7, ease: "easeOut", delay: 0.35 }}
+                        className={`h-full rounded-full ${done ? "bg-green-400" : "bg-[#0071e3]"}`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Badges */}
+        {stats && stats.badges.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }} className="bg-[#161b22] border border-[#21262d] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm font-semibold text-[#8b949e] uppercase tracking-wider">Badges</div>
+              <div className="text-xs text-[#8b949e]">{stats.badges.length} earned</div>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {stats.badges.map((b) => (
+                <div key={b.slug} title={b.desc} className="flex items-center gap-2 px-3 py-2 bg-[#0d1117] border border-yellow-500/15 rounded-xl hover:border-yellow-500/30 transition-colors group">
+                  <span className="text-xl">{b.icon}</span>
+                  <div>
+                    <div className="text-xs font-semibold text-yellow-400 group-hover:text-yellow-300 transition-colors">{b.name}</div>
+                    <div className="text-[10px] text-[#6e7681]">{new Date(b.awardedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Languages used */}
         {stats && Object.keys(stats.languages).length > 0 && (

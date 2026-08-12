@@ -13,7 +13,9 @@ export default async function ProblemPage({
 
   if (isNaN(problemId)) notFound();
 
-  const [raw, prev, next, totalCount, solutions] = await Promise.all([
+  const daysSinceEpoch = Math.floor(Date.now() / 86_400_000);
+
+  const [raw, prev, next, allProblemIds, solutions] = await Promise.all([
     prisma.intelProblem.findUnique({
       where: { id: problemId },
       include: {
@@ -33,7 +35,7 @@ export default async function ProblemPage({
       orderBy: { id: "asc" },
       select:  { id: true, title: true },
     }),
-    prisma.intelProblem.count(),
+    prisma.intelProblem.findMany({ select: { id: true }, orderBy: { id: "asc" } }),
     prisma.intelSolution.findMany({
       where:   { problemId },
       orderBy: { createdAt: "asc" },
@@ -64,7 +66,10 @@ export default async function ProblemPage({
     functionMeta: (raw.functionMeta as unknown as Problem["functionMeta"]) ?? null,
   };
 
-  const companies = (raw?.playlistItems ?? []).map((item) => item.playlist);
+  const companies  = (raw?.playlistItems ?? []).map((item) => item.playlist);
+  const totalCount = allProblemIds.length;
+  const dailyId    = totalCount > 0 ? allProblemIds[daysSinceEpoch % totalCount].id : -1;
+  const isDaily    = dailyId === problemId;
 
   return (
     <IDEClient
@@ -74,6 +79,7 @@ export default async function ProblemPage({
       next={next}
       totalCount={totalCount}
       companies={companies}
+      isDaily={isDaily}
     />
   );
 }

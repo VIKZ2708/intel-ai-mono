@@ -27,7 +27,8 @@ import {
   Zap, ChevronLeft, ChevronRight, Play, Send, Bot,
   CheckCircle2, XCircle, Clock, RotateCcw, Loader2,
   Cpu, MemoryStick, BookOpen, Users, Lightbulb,
-  AlertCircle, ChevronDown, ChevronUp, ArrowRight, History,
+  AlertCircle, ChevronDown, ChevronUp, ArrowRight, History, Flame,
+  Bookmark, BookmarkCheck, Trophy,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -77,6 +78,9 @@ interface SubmitResult {
   runtime: number | null; memory: number | null;
   lines: TestLine[];
   submittedCode: string; submittedLang: string;
+  dailyBonus?: number;
+  runtimePercentile?: number;
+  newBadges?: { slug: string; name: string; icon: string; desc: string }[];
 }
 
 
@@ -124,6 +128,7 @@ export default function IDEClient({
   next,
   totalCount,
   companies = [],
+  isDaily = false,
 }: {
   problem: Problem;
   solutions: DBSolution[];
@@ -131,6 +136,7 @@ export default function IDEClient({
   next: NavItem | null;
   totalCount: number;
   companies?: CompanyTag[];
+  isDaily?: boolean;
 }) {
   const { data: session } = useSession();
   const editorialSols  = solutions.filter((s) => s.solutionType === "editorial");
@@ -154,6 +160,7 @@ export default function IDEClient({
   const [history, setHistory]           = useState<PastSubmission[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
+  const [bookmarked, setBookmarked]           = useState(false);
 
 
   // ── Resizable panels ──────────────────────────────────────────────────────
@@ -202,6 +209,23 @@ export default function IDEClient({
   useEffect(() => {
     if (leftTab === "history") fetchHistory();
   }, [leftTab, fetchHistory]);
+
+  // Fetch bookmark status on mount
+  useEffect(() => {
+    if (!session?.user) return;
+    apiFetch("/bookmarks").then((r) => r.json()).then((d) => {
+      setBookmarked((d.bookmarkedIds ?? []).includes(problem.id));
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, problem.id]);
+
+  async function toggleBookmark() {
+    if (!session?.user) return;
+    const next = !bookmarked;
+    setBookmarked(next);
+    apiFetch("/bookmarks", { method: "POST", body: JSON.stringify({ problemId: problem.id }) })
+      .catch(() => setBookmarked(!next));
+  }
 
   // Restore saved code on mount
   useEffect(() => {
@@ -322,7 +346,16 @@ export default function IDEClient({
               apiFetch("/submissions", {
                 method: "POST",
                 body: JSON.stringify({ problemId: problem.id, language: lang, code, status: "accepted", runtime, memory }),
-              }).then(() => fetchHistory()).catch(() => {});
+              }).then(async (res) => {
+                const data = await res.json().catch(() => ({}));
+                setSubmitResult((prev) => prev ? {
+                  ...prev,
+                  dailyBonus:        data.dailyBonus        ?? prev.dailyBonus,
+                  runtimePercentile: data.runtimePercentile ?? prev.runtimePercentile,
+                  newBadges:         data.newBadges         ?? prev.newBadges,
+                } : prev);
+                fetchHistory();
+              }).catch(() => {});
             }
           }
         } else if (total > 0) {
@@ -418,6 +451,13 @@ export default function IDEClient({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={toggleBookmark}
+            title={bookmarked ? "Remove bookmark" : "Bookmark problem"}
+            className={`p-1.5 rounded-lg border transition-all ${bookmarked ? "text-amber-400 border-amber-400/30 bg-amber-400/10" : "text-[#6e7681] border-[#21262d] hover:text-amber-400 hover:border-amber-400/20"}`}
+          >
+            {bookmarked ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+          </button>
           <button
             onClick={() => setAiOpen(!aiOpen)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${aiOpen ? "bg-[#0071e3]/20 border-[#0071e3]/40 text-[#0071e3]" : "bg-[#1c2333] border-[#21262d] text-[#8b949e] hover:text-white"}`}
@@ -541,12 +581,29 @@ export default function IDEClient({
                     <div className="text-xs text-[#8b949e]">{submitResult.passed}/{submitResult.total} testcases passed</div>
                   </div>
                 </div>
+                {submitResult.dailyBonus != null && submitResult.dailyBonus > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.3, type: "spring", stiffness: 260, damping: 20 }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-500/30 bg-amber-500/10"
+                  >
+                    <Flame className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-bold text-amber-400">Daily Challenge Complete!</div>
+                      <div className="text-xs text-[#8b949e]">+{submitResult.dailyBonus} Bonus XP earned</div>
+                    </div>
+                  </motion.div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-[#0d1117] border border-[#21262d] rounded-xl p-4">
                     <div className="flex items-center gap-1.5 text-xs text-[#8b949e] mb-2"><Clock className="w-3 h-3" /> Runtime</div>
                     {submitResult.runtime != null
                       ? <div className="text-2xl font-bold text-white">{submitResult.runtime}<span className="text-sm font-normal text-[#8b949e] ml-1">ms</span></div>
                       : <div className="text-2xl font-bold text-[#8b949e]">N/A</div>}
+                    {submitResult.runtimePercentile != null && (
+                      <div className="text-[10px] text-green-400 mt-1 font-medium">Beats {submitResult.runtimePercentile}% of users</div>
+                    )}
                   </div>
                   <div className="bg-[#0d1117] border border-[#21262d] rounded-xl p-4">
                     <div className="flex items-center gap-1.5 text-xs text-[#8b949e] mb-2"><MemoryStick className="w-3 h-3" /> Memory</div>
@@ -555,6 +612,25 @@ export default function IDEClient({
                       : <div className="text-2xl font-bold text-[#8b949e]">N/A</div>}
                   </div>
                 </div>
+                {submitResult.newBadges && submitResult.newBadges.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, type: "spring", stiffness: 260, damping: 20 }}
+                    className="space-y-2"
+                  >
+                    {submitResult.newBadges.map((b) => (
+                      <div key={b.slug} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-yellow-500/25 bg-yellow-500/8">
+                        <span className="text-xl">{b.icon}</span>
+                        <div>
+                          <div className="text-xs font-bold text-yellow-400 flex items-center gap-1.5">
+                            <Trophy className="w-3 h-3" /> Badge Unlocked — {b.name}
+                          </div>
+                          <div className="text-[10px] text-[#8b949e]">{b.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Your Solution</span>
@@ -634,6 +710,13 @@ export default function IDEClient({
             {/* ── DESCRIPTION ── */}
             {leftTab === "description" && (
               <div className="p-5">
+                {isDaily && (
+                  <div className="flex items-center gap-2 px-3 py-2 mb-4 rounded-xl border border-amber-500/25 bg-amber-500/8">
+                    <Flame className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                    <span className="text-xs font-bold text-amber-400">Daily Challenge</span>
+                    <span className="text-xs text-[#8b949e]">· Solve today to earn Bonus XP</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${difficultyColor[problem.difficulty] ?? "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
                     {problem.difficulty}

@@ -15,7 +15,9 @@ export type Category =
   | "Bit Manipulation"
   | "Math"
   | "Intervals"
-  | "Design";
+  | "Design"
+  | "Trie"
+  | "Arrays & Hashing";
 
 export interface TestCase {
   input: string;

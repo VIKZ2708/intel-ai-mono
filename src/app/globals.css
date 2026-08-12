@@ -153,3 +153,7 @@ body {
   50%       { opacity: 0.22; transform: scale(1.08); }
 }
 .aurora { animation: aurora-pulse 6s ease-in-out infinite; }
+
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

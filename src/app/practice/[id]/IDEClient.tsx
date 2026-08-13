@@ -28,7 +28,7 @@ import {
   CheckCircle2, XCircle, Clock, RotateCcw, Loader2,
   Cpu, MemoryStick, BookOpen, Users, Lightbulb,
   AlertCircle, ChevronDown, ChevronUp, ArrowRight, History, Flame,
-  Bookmark, BookmarkCheck, Trophy,
+  Bookmark, BookmarkCheck, Trophy, Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -161,6 +161,8 @@ export default function IDEClient({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [expandedHistory, setExpandedHistory] = useState<string | null>(null);
   const [bookmarked, setBookmarked]           = useState(false);
+  const [aiReview, setAiReview]               = useState("");
+  const [aiReviewLoading, setAiReviewLoading] = useState(false);
 
 
   // ── Resizable panels ──────────────────────────────────────────────────────
@@ -227,6 +229,37 @@ export default function IDEClient({
       .catch(() => setBookmarked(!next));
   }
 
+  async function getAIReview(submittedCode: string, submittedLang: string) {
+    if (aiReviewLoading) return;
+    setAiReview("");
+    setAiReviewLoading(true);
+    try {
+      const res = await fetch("/api/ai-review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: submittedCode,
+          language: submittedLang,
+          problemTitle: problem.title,
+          problemDifficulty: problem.difficulty,
+          problemDescription: problem.description,
+        }),
+      });
+      if (!res.ok || !res.body) throw new Error("Review failed");
+      const reader = res.body.getReader();
+      const dec    = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        setAiReview((prev) => prev + dec.decode(value, { stream: true }));
+      }
+    } catch {
+      setAiReview("Failed to get review. Please try again.");
+    } finally {
+      setAiReviewLoading(false);
+    }
+  }
+
   // Restore saved code on mount
   useEffect(() => {
     const saved = localStorage.getItem(`intel-ai-code-${problem.id}-${lang}`);
@@ -264,6 +297,7 @@ export default function IDEClient({
     setRunStatus(isSubmit ? "submitting" : "running");
     setConsoleTab("output");
     setSubmitResult(null);
+    setAiReview("");
     setLines([{ status: "info", text: isSubmit ? "⏳ Submitting your solution..." : "⏳ Running your code..." }]);
 
     const langDef   = LANGUAGES.find((l) => l.id === lang)!;
@@ -631,6 +665,61 @@ export default function IDEClient({
                     ))}
                   </motion.div>
                 )}
+                {/* ── AI Code Review ── */}
+                <div className="rounded-xl border border-[#21262d] bg-[#0d1117] overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#21262d]">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-[#0071e3]" />
+                      <span className="text-xs font-semibold text-white">AI Code Review</span>
+                    </div>
+                    {!aiReview && !aiReviewLoading && (
+                      <button
+                        onClick={() => getAIReview(submitResult.submittedCode, submitResult.submittedLang)}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-[#0071e3]/15 border border-[#0071e3]/30 text-[#3d95f4] hover:bg-[#0071e3]/25 transition-colors"
+                      >
+                        <Sparkles className="w-3 h-3" /> Get Review
+                      </button>
+                    )}
+                    {aiReviewLoading && (
+                      <span className="flex items-center gap-1.5 text-xs text-[#8b949e]">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Analyzing…
+                      </span>
+                    )}
+                  </div>
+                  <div className="px-4 py-3">
+                    {!aiReview && !aiReviewLoading && (
+                      <p className="text-xs text-[#6e7681]">Get instant complexity analysis and improvement suggestions from Claude.</p>
+                    )}
+                    {aiReviewLoading && !aiReview && (
+                      <div className="space-y-2 animate-pulse">
+                        {[80, 60, 90, 50, 70].map((w, i) => (
+                          <div key={i} className="h-2.5 bg-[#21262d] rounded-full" style={{ width: `${w}%` }} />
+                        ))}
+                      </div>
+                    )}
+                    {aiReview && (
+                      <div className="text-xs text-[#c9d1d9] leading-relaxed space-y-2">
+                        {aiReview.split("\n").map((line, i) => {
+                          if (line.startsWith("## ")) return (
+                            <div key={i} className="flex items-center gap-2 pt-1">
+                              <span className="text-[11px] font-bold text-white uppercase tracking-wider">{line.replace("## ", "")}</span>
+                            </div>
+                          );
+                          if (line.startsWith("- ") || line.startsWith("• ")) return (
+                            <div key={i} className="flex gap-2 pl-1">
+                              <span className="text-[#0071e3] flex-shrink-0 mt-0.5">·</span>
+                              <span>{line.replace(/^[-•]\s/, "").replace(/\*\*(.*?)\*\*/g, "$1")}</span>
+                            </div>
+                          );
+                          if (line.trim() === "") return <div key={i} className="h-1" />;
+                          const formatted = line.replace(/\*\*(.*?)\*\*/g, "$1");
+                          return <p key={i}>{formatted}</p>;
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-semibold text-[#8b949e] uppercase tracking-wider">Your Solution</span>

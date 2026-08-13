@@ -410,7 +410,7 @@ function genJava(meta: FunctionMeta, cases: TestCase[]): string {
   const total = cases.length;
 
   const blocks = cases.map(c => {
-    const label = makeLabel(meta.params, c.input);
+    const label = makeLabel(meta.params, c.input).replace(/"/g, '\\"');
 
     const args = meta.params.map(p => {
       if (p.type === "TreeNodeRef") return `fn(_root,${c.input[p.name]})`;
@@ -588,7 +588,7 @@ function genCPP(meta: FunctionMeta, cases: TestCase[]): string {
   const total = cases.length;
 
   const blocks = cases.map(c => {
-    const label = makeLabel(meta.params, c.input);
+    const label = makeLabel(meta.params, c.input).replace(/"/g, '\\"');
 
     let pre = "";
     if (needsRoot && rootParam)

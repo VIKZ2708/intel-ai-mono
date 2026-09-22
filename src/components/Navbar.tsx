@@ -17,6 +17,7 @@ const navLinks = [
   { label: "Practice",        href: "/practice" },
   { label: "Mock Interview",  href: "/mock-interview" },
   { label: "Study Plan",      href: "/study-plan" },
+  { label: "Campus",          href: "/campus" },
   { label: "Leaderboard",     href: "/leaderboard" },
   { label: "Founders",        href: "#founders" },
 ];

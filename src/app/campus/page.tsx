@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LoginModal from "@/components/LoginModal";
 import {
-  ArrowRight, Check, MessageCircle, Building2, GraduationCap,
+  ArrowRight, Check, MessageCircle, Building2,
   FileText, Users, Trophy, BookOpen, Zap, ChevronDown, Star,
   MapPin, Phone, Mail, BadgeCheck
 } from "lucide-react";
@@ -95,82 +94,15 @@ const steps = [
 ];
 
 const faqs = [
-  { q: "Is coding experience required for students to enrol?", a: "No. The programme starts from the ground up and is suitable for students in any year of their engineering or BCA/MCA degree." },
+  { q: "What does the college need to provide?", a: "A venue and students. Intel AI brings the curriculum, instructors, study material, and placement support. No special infrastructure is required from the college." },
   { q: "How are sessions conducted — online or offline?", a: "We offer both. Colleges can choose fully on-campus, fully online, or a hybrid model based on their infrastructure and schedule." },
   { q: "What is the fee for the programme?", a: "The fee is customised based on the college's student strength, batch size, and selected modules. Contact us for a personalised quote." },
-  { q: "Does Intel AI provide study material and LMS access?", a: "Yes. All registered students get full access to Intel AI's online platform including video lessons, practice problems, and AI-assisted learning tools." },
+  { q: "Does Intel AI provide study material and LMS access?", a: "Yes. All enrolled students get full access to Intel AI's online platform including video lessons, practice problems, and AI-assisted learning tools." },
   { q: "How many students per batch?", a: "We support batches from 30 to 300+ students. Larger batches may have multiple instructors assigned." },
-  { q: "Can individual students register without a college tie-up?", a: "Yes. Students can register individually and join the programme independently while we work on onboarding their college." },
+  { q: "How long does the MOU process take?", a: "Typically 5–7 working days from the initial call. Our team handles all documentation and onboarding to make it seamless for your institution." },
 ];
 
-// ─── Registration Form ────────────────────────────────────────────────────────
-
-type TabType = "student" | "college";
-
-function StudentForm({ onSuccess }: { onSuccess: () => void }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", college: "", year: "", city: "" });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => { setLoading(false); onSuccess(); }, 1200);
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="text-xs font-medium text-[#8b949e] mb-1.5 block">Full Name *</label>
-          <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            placeholder="Rahul Sharma"
-            className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-xl text-white placeholder:text-[#484f58] text-sm focus:outline-none focus:border-[#0071e3] transition-colors" />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-[#8b949e] mb-1.5 block">Email Address *</label>
-          <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-            placeholder="rahul@example.com"
-            className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-xl text-white placeholder:text-[#484f58] text-sm focus:outline-none focus:border-[#0071e3] transition-colors" />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-[#8b949e] mb-1.5 block">Phone Number *</label>
-          <input required value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-            placeholder="+91 98765 43210"
-            className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-xl text-white placeholder:text-[#484f58] text-sm focus:outline-none focus:border-[#0071e3] transition-colors" />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-[#8b949e] mb-1.5 block">College / University *</label>
-          <input required value={form.college} onChange={e => setForm(f => ({ ...f, college: e.target.value }))}
-            placeholder="Delhi Technological University"
-            className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-xl text-white placeholder:text-[#484f58] text-sm focus:outline-none focus:border-[#0071e3] transition-colors" />
-        </div>
-        <div>
-          <label className="text-xs font-medium text-[#8b949e] mb-1.5 block">Year of Study *</label>
-          <select required value={form.year} onChange={e => setForm(f => ({ ...f, year: e.target.value }))}
-            className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-xl text-white text-sm focus:outline-none focus:border-[#0071e3] transition-colors appearance-none">
-            <option value="" disabled>Select year</option>
-            <option>1st Year</option>
-            <option>2nd Year</option>
-            <option>3rd Year</option>
-            <option>4th Year</option>
-            <option>MCA / Post-Graduate</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-xs font-medium text-[#8b949e] mb-1.5 block">City *</label>
-          <input required value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-            placeholder="New Delhi"
-            className="w-full px-4 py-3 bg-[#0d1117] border border-[#30363d] rounded-xl text-white placeholder:text-[#484f58] text-sm focus:outline-none focus:border-[#0071e3] transition-colors" />
-        </div>
-      </div>
-      <button type="submit" disabled={loading}
-        className="w-full py-4 bg-[#0071e3] hover:bg-[#0058b3] disabled:opacity-60 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-[#0071e3]/25 flex items-center justify-center gap-2">
-        {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Registering...</>
-          : <><GraduationCap className="w-4 h-4" /> Register as Student</>}
-      </button>
-    </form>
-  );
-}
+// ─── College Registration Form ────────────────────────────────────────────────
 
 function CollegeForm({ onSuccess }: { onSuccess: () => void }) {
   const [form, setForm] = useState({ institution: "", contact: "", email: "", phone: "", city: "", students: "" });
@@ -229,14 +161,15 @@ function CollegeForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <button type="submit" disabled={loading}
         className="w-full py-4 bg-gradient-to-r from-purple-600 to-[#0071e3] hover:opacity-90 disabled:opacity-60 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2">
-        {loading ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</>
+        {loading
+          ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting...</>
           : <><Building2 className="w-4 h-4" /> Partner with Intel AI</>}
       </button>
     </form>
   );
 }
 
-function SuccessState({ tab }: { tab: TabType }) {
+function SuccessState() {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -246,13 +179,9 @@ function SuccessState({ tab }: { tab: TabType }) {
       <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-5">
         <BadgeCheck className="w-8 h-8 text-green-400" />
       </div>
-      <h3 className="text-xl font-bold text-white mb-2">
-        {tab === "student" ? "You're on the list!" : "Partnership request received!"}
-      </h3>
+      <h3 className="text-xl font-bold text-white mb-2">Partnership request received!</h3>
       <p className="text-[#8b949e] max-w-sm mx-auto text-sm">
-        {tab === "student"
-          ? "We'll reach out to you within 24 hours with programme details and next steps."
-          : "Our team will contact you within 48 hours to discuss the partnership and schedule a call."}
+        Our team will contact you within 48 hours to discuss the partnership and schedule a call.
       </p>
       <p className="text-xs text-[#8b949e]/60 mt-4">
         Questions? Email us at{" "}
@@ -295,8 +224,6 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 export default function CampusPage() {
   const [loginOpen, setLoginOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>("student");
-  const [studentDone, setStudentDone] = useState(false);
   const [collegeDone, setCollegeDone] = useState(false);
 
   return (
@@ -352,14 +279,13 @@ export default function CampusPage() {
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
-            <a href="#register"
+            <a href="#partner"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0071e3] hover:bg-[#0058b3] text-white font-semibold rounded-xl text-base transition-all duration-200 shadow-lg shadow-[#0071e3]/25 hover:-translate-y-0.5">
-              <GraduationCap className="w-4 h-4" /> Register as Student
-            </a>
-            <a href="#register"
-              onClick={() => setActiveTab("college")}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-[#30363d] hover:border-[#0071e3]/50 text-white font-semibold rounded-xl text-base transition-all duration-200 hover:-translate-y-0.5">
               <Building2 className="w-4 h-4" /> Partner Your College
+            </a>
+            <a href="#how-it-works"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-[#30363d] hover:border-[#0071e3]/50 text-white font-semibold rounded-xl text-base transition-all duration-200 hover:-translate-y-0.5">
+              How It Works <ArrowRight className="w-4 h-4" />
             </a>
           </motion.div>
         </div>
@@ -369,9 +295,9 @@ export default function CampusPage() {
       <section className="py-12 bg-[#161b22] border-y border-[#21262d]">
         <div className="max-w-4xl mx-auto px-4 grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {[
-            { val: "1 Year",   label: "Structured Programme" },
-            { val: "4",        label: "Core Subjects" },
-            { val: "100+",     label: "Hiring Partners" },
+            { val: "1 Year",    label: "Structured Programme" },
+            { val: "4",         label: "Core Subjects" },
+            { val: "100+",      label: "Hiring Partners" },
             { val: "On-Campus", label: "Delivery Mode" },
           ].map((s, i) => (
             <motion.div key={s.label}
@@ -387,7 +313,7 @@ export default function CampusPage() {
       </section>
 
       {/* ── How It Works ── */}
-      <section className="py-24 bg-[#0d1117]">
+      <section id="how-it-works" className="py-24 bg-[#0d1117]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
@@ -401,9 +327,7 @@ export default function CampusPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-            {/* Connector line — desktop only */}
             <div className="hidden lg:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-[#0071e3]/30 to-transparent" />
-
             {steps.map((s, i) => (
               <motion.div key={s.step}
                 initial={{ opacity: 0, y: 30 }}
@@ -460,18 +384,18 @@ export default function CampusPage() {
         </div>
       </section>
 
-      {/* ── What Students Get ── */}
+      {/* ── What Students Get (informational — for colleges to see the value) ── */}
       <section className="py-24 bg-[#0d1117]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#0071e3] mb-3">For Students</span>
+              <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#0071e3] mb-3">Student Outcomes</span>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                What Students{" "}
+                What Your Students{" "}
                 <span className="gradient-text">Walk Away With</span>
               </h2>
               <p className="text-[#8b949e] mb-8 leading-relaxed">
-                Every student enrolled in the Intel AI College Programme gets a complete learning ecosystem — not just lectures, but a full placement-ready journey.
+                Every student enrolled through your institution gets a complete learning ecosystem — not just lectures, but a full placement-ready journey.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {studentPerks.map((perk) => (
@@ -481,10 +405,6 @@ export default function CampusPage() {
                   </div>
                 ))}
               </div>
-              <a href="#register"
-                className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-[#0071e3] hover:bg-[#0058b3] text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-[#0071e3]/25 text-sm">
-                Register Now <ArrowRight className="w-4 h-4" />
-              </a>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
@@ -557,59 +477,33 @@ export default function CampusPage() {
         </div>
       </section>
 
-      {/* ── Register ── */}
-      <section id="register" className="py-24 bg-[#0d1117] relative overflow-hidden">
+      {/* ── Partner Form ── */}
+      <section id="partner" className="py-24 bg-[#0d1117] relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#0071e3]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="relative max-w-2xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-10">
             <motion.span initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
               className="inline-block text-xs font-semibold uppercase tracking-widest text-[#0071e3] mb-3">
-              Get Started
+              Partner with Us
             </motion.span>
             <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               className="text-3xl sm:text-4xl font-bold text-white mb-3">
-              Register <span className="gradient-text">Today</span>
+              Bring Intel AI to <span className="gradient-text">Your Campus</span>
             </motion.h2>
             <motion.p initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               className="text-[#8b949e]">
-              Are you a student eager to upskill, or a college ready to partner with us?
+              Fill in your institution&apos;s details and our team will get back to you within 48 hours.
             </motion.p>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="bg-[#161b22] border border-[#21262d] rounded-2xl p-8">
-            {/* Tab switcher */}
-            <div className="flex rounded-xl bg-[#0d1117] border border-[#21262d] p-1 mb-8">
-              {(["student", "college"] as TabType[]).map((t) => (
-                <button key={t} onClick={() => setActiveTab(t)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                    activeTab === t
-                      ? "bg-[#0071e3] text-white shadow"
-                      : "text-[#8b949e] hover:text-white"
-                  }`}>
-                  {t === "student" ? <><GraduationCap className="w-4 h-4" /> I&apos;m a Student</>
-                    : <><Building2 className="w-4 h-4" /> I&apos;m a College</>}
-                </button>
-              ))}
-            </div>
-
-            <AnimatePresence mode="wait">
-              {activeTab === "student" ? (
-                <motion.div key="student" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}>
-                  {studentDone ? <SuccessState tab="student" /> : <StudentForm onSuccess={() => setStudentDone(true)} />}
-                </motion.div>
-              ) : (
-                <motion.div key="college" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }}>
-                  {collegeDone ? <SuccessState tab="college" /> : <CollegeForm onSuccess={() => setCollegeDone(true)} />}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {collegeDone ? <SuccessState /> : <CollegeForm onSuccess={() => setCollegeDone(true)} />}
           </motion.div>
 
-          {/* WhatsApp fallback */}
           <div className="text-center mt-6">
             <p className="text-xs text-[#8b949e] mb-3">Prefer to talk directly?</p>
-            <a href="https://wa.me/919871358616?text=Hi%2C%20I%27m%20interested%20in%20the%20Intel%20AI%20College%20Programme.%20Can%20you%20share%20more%20details%3F"
+            <a href="https://wa.me/919871358616?text=Hi%2C%20I%27m%20interested%20in%20partnering%20with%20Intel%20AI%20for%20the%20College%20Programme.%20Can%20you%20share%20more%20details%3F"
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#21262d] hover:border-green-500/40 text-[#8b949e] hover:text-green-400 rounded-xl text-sm transition-all">
               <MessageCircle className="w-4 h-4" /> Chat on WhatsApp
@@ -622,9 +516,9 @@ export default function CampusPage() {
       <section className="py-12 bg-[#161b22] border-y border-[#21262d]">
         <div className="max-w-4xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
           {[
-            { icon: Mail, label: "Email Us", val: "vikz2708@gmail.com", href: "mailto:vikz2708@gmail.com" },
-            { icon: Phone, label: "WhatsApp", val: "+91 98713 58616", href: "https://wa.me/919871358616" },
-            { icon: MapPin, label: "Based In", val: "India · On-campus across cities", href: null },
+            { icon: Mail,    label: "Email Us",  val: "vikz2708@gmail.com",                href: "mailto:vikz2708@gmail.com" },
+            { icon: Phone,   label: "WhatsApp",  val: "+91 98713 58616",                   href: "https://wa.me/919871358616" },
+            { icon: MapPin,  label: "Based In",  val: "India · On-campus across cities",   href: null },
           ].map((c) => (
             <div key={c.label} className="flex flex-col items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-[#0071e3]/10 border border-[#0071e3]/20 flex items-center justify-center">
@@ -686,13 +580,14 @@ export default function CampusPage() {
           <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#register"
+            <a href="#partner"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0071e3] hover:bg-[#0058b3] text-white font-semibold rounded-xl text-base transition-all duration-200 shadow-lg shadow-[#0071e3]/25">
-              Register Now <ArrowRight className="w-4 h-4" />
+              <Building2 className="w-4 h-4" /> Partner Your College <ArrowRight className="w-4 h-4" />
             </a>
-            <a href="#register" onClick={() => setActiveTab("college")}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#30363d] hover:border-[#0071e3]/50 text-white font-semibold rounded-xl text-base transition-all duration-200 hover:bg-white/5">
-              Partner Your College
+            <a href="https://wa.me/919871358616?text=Hi%2C%20I%27m%20interested%20in%20partnering%20with%20Intel%20AI%20for%20the%20College%20Programme."
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-[#30363d] hover:border-green-500/40 text-white hover:text-green-400 font-semibold rounded-xl text-base transition-all duration-200 hover:bg-white/5">
+              <MessageCircle className="w-4 h-4" /> Talk on WhatsApp
             </a>
           </motion.div>
         </div>
